@@ -1,0 +1,32 @@
+{
+  "name": "what-the-frac-contracts",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": " ",
+  "scripts": {
+    "compile": "npx buidler compile"
+  },
+  "devDependencies": {
+    "@nomiclabs/buidler": "^1.1.2",
+    "@nomiclabs/buidler-ethers": "^1.1.2",
+    "@nomiclabs/buidler-etherscan": "^1.1.2",
+    "@nomiclabs/buidler-waffle": "^1.1.2",
+    "@types/chai": "^4.2.8",
+    "@types/mocha": "^7.0.1",
+    "@types/node": "^13.7.0",
+    "buidler-typechain": "0.0.5",
+    "chai": "^4.2.0",
+    "dotenv": "^8.2.0",
+    "ethereum-waffle": "^2.3.2",
+    "ethers": "^4.0.44",
+    "solc": "^0.6.4",
+    "solidity-coverage": "^0.7.1",
+    "ts-generator": "0.0.8",
+    "ts-node": "^8.6.2",
+    "typechain": "^1.0.4",
+    "typechain-target-ethers": "^1.0.3",
+    "typechain-target-truffle": "^1.0.2",
+    "typechain-target-web3-v1": "^1.0.4",
+    "typescript": "^3.7.5"
+  }
+}
