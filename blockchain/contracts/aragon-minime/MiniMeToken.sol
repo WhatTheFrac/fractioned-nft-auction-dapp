@@ -122,8 +122,8 @@ contract MiniMeToken is Controlled {
     /// @param _tokenSymbol Token Symbol for the new token
     /// @param _transfersEnabled If true, tokens will be able to be transferred
    constructor(
-        MiniMeTokenFactory _tokenFactory,
-        MiniMeToken _parentToken,
+        address _tokenFactory,
+        address _parentToken,
         uint _parentSnapShotBlock,
         string memory _tokenName,
         uint8 _decimalUnits,
@@ -131,11 +131,11 @@ contract MiniMeToken is Controlled {
         bool _transfersEnabled
     )  public
     {
-        tokenFactory = _tokenFactory;
+        tokenFactory = MiniMeTokenFactory(payable(_tokenFactory));
         name = _tokenName;                                 // Set the name
         decimals = _decimalUnits;                          // Set the decimals
         symbol = _tokenSymbol;                             // Set the symbol
-        parentToken = _parentToken;
+        parentToken = MiniMeToken(payable(_parentToken));
         parentSnapShotBlock = _parentSnapShotBlock;
         transfersEnabled = _transfersEnabled;
         creationBlock = block.number;
@@ -562,8 +562,8 @@ contract MiniMeTokenFactory {
     ) public returns (MiniMeToken)
     {
         MiniMeToken newToken = new MiniMeToken(
-            this,
-            _parentToken,
+            address(this),
+            address(_parentToken),
             _snapshotBlock,
             _tokenName,
             _decimalUnits,
