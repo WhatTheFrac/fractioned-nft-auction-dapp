@@ -7726,7 +7726,7 @@ type@^2.0.0:
   resolved "https://registry.yarnpkg.com/type/-/type-2.0.0.tgz#5f16ff6ef2eb44f260494dae271033b29c09a9c3"
   integrity sha512-KBt58xCHry4Cejnc2ISQAF7QY+ORngsWfxezO68+12hKV6lQY8P/psIkcbjeHWn7MqcgciWJyCCevFMJdIXpow==
 
-typechain-target-ethers@^1.0.3:
+typechain-target-ethers@^1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/typechain-target-ethers/-/typechain-target-ethers-1.0.4.tgz#597d92bb7db66a656126c930db4a0f5be287a37d"
   integrity sha512-ay4qcan8erubMgBUcMErKplwQXydWCo/mBmrYGfbnnbUYzRe99jGs4uuSEi1JH2jGDtRi1sRDpIW0q9V4fd14A==
@@ -7748,7 +7748,7 @@ typechain-target-web3-v1@^1.0.4:
     lodash "^4.17.15"
     web3 "^1.2.4"
 
-typechain@^1.0.4:
+typechain@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/typechain/-/typechain-1.0.5.tgz#797899d9dbce54a83b3aef04ce1727ddf07d2138"
   integrity sha512-gbQmJXPKuYQ0p3tK+dMhpdQql/UPtSnkPQXw2QM/aqwCengI86z2vEM2e5rVQpmk/blFx1PYNdApSDxE12rR1Q==
