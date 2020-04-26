@@ -6,7 +6,8 @@
   "scripts": {
     "compile": "npx buidler compile",
     "typechain": "typechain --target ethers --outDir typechain './artifacts/*.json'",
-    "build": "yarn compile && yarn typechain"
+    "build": "yarn compile && yarn typechain",
+    "test": "npx buidler test"
   },
   "devDependencies": {
     "@nomiclabs/buidler": "^1.1.2",
