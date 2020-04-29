@@ -1,6 +1,9 @@
 import Web3 from 'web3';
 import isEmpty from 'lodash/isEmpty';
 
+// assets
+import erc20Abi from '../assets/abi/erc20.json';
+
 
 export const truncateHexString = (targetString) => {
   if (!targetString) return '';
@@ -37,3 +40,15 @@ export const getNetworkNameById = (networkId) => {
       return 'Unknown network';
   }
 };
+
+export const pauseForSeconds = (seconds) => new Promise(resolve => setTimeout(resolve, (seconds || 1) * 1000));
+
+export const getERC20Contract = (address) => new window.web3.eth.Contract(erc20Abi, address);
+
+export const getTokenBalance = (
+  walletAddress,
+  tokenAddress,
+  tokenDecimals,
+) => getERC20Contract(tokenAddress).methods.balanceOf(walletAddress).call()
+    .then((balanceInWei) => Number(tokenDecimals > 0 ? Number(balanceInWei) / (10 ** tokenDecimals) : balanceInWei))
+    .catch(() => 0);
