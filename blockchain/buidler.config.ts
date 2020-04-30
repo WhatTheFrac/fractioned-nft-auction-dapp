@@ -22,6 +22,10 @@ const config: ExtendedBuidlerConfig = {
     
   },
   networks: {
+    buidlerevm: {
+      gasPrice: 0,
+      blockGasLimit: 100000000,
+    },
     kovan: {
       url: `https://kovan.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [KOVAN_PRIVATE_KEY]
