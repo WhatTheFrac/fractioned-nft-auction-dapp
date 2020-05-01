@@ -10,6 +10,7 @@ import isEmpty from 'lodash/isEmpty';
 import Wallet from '../components/Wallet';
 import NftAssetsSelect from '../components/NftAssetsSelect';
 import TokenBalance from '../components/TokenBalance';
+import FractionateButton from '../components/FractionateButton';
 
 // utils
 import { isSupportedBrowser } from '../utils';
@@ -70,6 +71,7 @@ const App = (props) => {
               </Box>
             </>
           )}
+          <FractionateButton />
         </Box>
       )}
     </Wrapper>
