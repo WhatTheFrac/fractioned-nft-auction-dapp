@@ -6,6 +6,9 @@ import thunk from 'redux-thunk';
 import { theme } from 'rimble-ui';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
 
+// assets
+import './assets/css/react-select-search-default.css';
+
 // components
 import App from './containers/App';
 
@@ -24,6 +27,11 @@ const customTheme = Object.assign({}, theme, {
 const GlobalStyle = createGlobalStyle`
   body {
     font-family: 'Baloo Tamma 2';
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
   }
 `;
 
