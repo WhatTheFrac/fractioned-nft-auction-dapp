@@ -74,4 +74,4 @@ FractionateModalInfoRow.propTypes = {
   secondaryData: PropTypes.string,
 };
 
-export default (FractionateModalInfoRow);
+export default FractionateModalInfoRow;

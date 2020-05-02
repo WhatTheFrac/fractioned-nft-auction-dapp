@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Flex, Loader, Text, Card, Button, Modal, Box, Heading, Link, Icon} from 'rimble-ui';
-import { connect } from 'react-redux';
-import { Eth } from '@rimble/icons';
+import { Flex, Text, Box, Link, Icon} from 'rimble-ui';
 import PropTypes from 'prop-types';
 
 const FractionateProgressBar = (props) => {
@@ -19,7 +17,7 @@ const FractionateProgressBar = (props) => {
 
   const getCurrentTime = () => Math.floor(Date.now() / 1000);
 
-  const [startTime, _] = useState(getCurrentTime());
+  const [startTime] = useState(getCurrentTime());
   const [currentTime, setCurrentTime] = useState(getCurrentTime());
 
   const updateCurrentTime = () => {
@@ -35,8 +33,6 @@ const FractionateProgressBar = (props) => {
       : SLOW_THRESHOLD + (timeElapsed - estimatedTimeInSeconds*SLOW_THRESHOLD) / (estimatedTimeInSeconds*SLOW_FACTOR);
 
   displayPercentage = Math.min(displayPercentage, MAX_BAR_PROGRESS);
-
-  console.log("render");
 
   setTimeout(updateCurrentTime, UPDATE_INTERVAL_MS);
 
@@ -104,10 +100,4 @@ FractionateProgressBar.propTypes = {
   estimatedTimeInSeconds: PropTypes.number.isRequired,
 };
 
-const mapStateToProps = ({
-  wallet: { connected: { address: connectedWalletAddress } },
-}) => ({
-  connectedWalletAddress,
-});
-
-export default connect(mapStateToProps)(FractionateProgressBar);
+export default FractionateProgressBar;

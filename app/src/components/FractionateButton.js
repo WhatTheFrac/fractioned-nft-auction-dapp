@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Flex, Loader, Text, Card, Button, Modal, Box, Heading, Link, Icon} from 'rimble-ui';
-import { connect } from 'react-redux';
 import { Eth } from '@rimble/icons';
 
 import FractionateModalInfoRow from './FractionateModalInfoRow';
 import FractionateProgressBar from './FractionateProgressBar';
+import FractionateSuccessDialog from './FractionateSuccessDialog';
+import FractionateFailureDialog from './FractionateFailureDialog';
 
 const FractionateButton = (props) => {
-  const { } = props;
+  // TODO const { } = props;
 
   const resetState = () => {
     setShowMetamaskConfirm(false);
@@ -18,6 +19,7 @@ const FractionateButton = (props) => {
     e.preventDefault();
     resetState();
     setIsOpen(false);
+    // TODO cancel in progress transaction if there is one in progress
   };
 
   const openModal = e => {
@@ -35,7 +37,7 @@ const FractionateButton = (props) => {
     3. user confirms with metamask
       -> metamaskConfirm()
         -> showMetamaskConfirm(false) showProgressBar(true)
-      -> transactionComplete()
+      -> transactionSuccess()
         -> success dialog shows [this modal replaced by success modal]
     4. user closes dialog
 
@@ -44,6 +46,9 @@ const FractionateButton = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showMetamaskConfirm, setShowMetamaskConfirm] = useState(false);
   const [transactionInProgress, setTransactionInProgress] = useState(false);
+
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showFailureDialog, setShowFailureDialog] = useState(false);
 
   const userFractionateConfirm = e => {
     e.preventDefault();
@@ -58,6 +63,35 @@ const FractionateButton = (props) => {
     setTransactionInProgress(true);
 
     // TODO take actual fractionate action
+  };
+
+  // TODO call this when the transaction actually succeeds
+  const openSuccessDialog = e => {
+    e.preventDefault();
+    resetState();
+    setShowSuccessDialog(true);
+    closeModal(e);
+  };
+
+  const closeSuccessDialog = () => {
+    setShowSuccessDialog(false);
+  };
+
+  // TODO call this when the transaction actually fails
+  const openFailureDialog = e => {
+    e.preventDefault();
+    resetState();
+    setShowFailureDialog(true);
+    closeModal(e);
+  };
+
+  const closeFailureDialog = () => {
+    setShowFailureDialog(false);
+  };
+
+  const estimatedTransactionTimeSeconds = () => {
+    // TODO make an actual estimate with eth gas station
+    return 15;
   };
 
   let metamaskConfirmIndicator = (
@@ -97,7 +131,7 @@ const FractionateButton = (props) => {
   );
 
   let header = transactionInProgress
-    ? <FractionateProgressBar estimatedTimeInSeconds={30} />
+    ? <FractionateProgressBar estimatedTimeInSeconds={estimatedTransactionTimeSeconds()} />
     : <Box bg={"primary"} px={3} py={2}>
         <Text color={"white"}>Summary of Fractionate</Text>
       </Box>;
@@ -114,10 +148,14 @@ const FractionateButton = (props) => {
             borderColor="near-white"
             p={[3, 4]}
           >
-            <Eth color="primary" size="40" />
-            <Heading textAlign="center" as="h1" fontSize={[2, 3]} px={[3, 0]}>
-              Confirm your purchase in [wallet]
-            </Heading>
+            <Flex onClick={openSuccessDialog}>
+              <Eth color="primary" size="40" />
+            </Flex>
+            <Flex onClick={openFailureDialog}>
+              <Heading textAlign="center" as="h1" fontSize={[2, 3]} px={[3, 0]}>
+                Confirm your purchase in [wallet]
+              </Heading>
+            </Flex>
             <Link onClick={closeModal}>
               <Icon name="Close" color="moon-gray" aria-label="Close" />
             </Link>
@@ -158,12 +196,17 @@ const FractionateButton = (props) => {
               </Flex>
               <Flex justifyContent="flex-end">
                 <Button.Outline onClick={closeModal} mr={1}>Cancel</Button.Outline>
-                <Button onClick={userFractionateConfirm}>Fractionate!</Button>
+                {!transactionInProgress
+                  ? <Button onClick={userFractionateConfirm}>Fractionate!</Button>
+                  : <Button disabled>Fractionate!</Button>
+                }
               </Flex>
             </Flex>
           </Box>
         </Card>
       </Modal>
+      <FractionateSuccessDialog isOpen={showSuccessDialog} closeHook={closeSuccessDialog} />
+      <FractionateFailureDialog isOpen={showFailureDialog} closeHook={closeFailureDialog} />
     </>
   );
 };
@@ -172,10 +215,4 @@ FractionateButton.propTypes = {
   // TODO
 };
 
-const mapStateToProps = ({
-  wallet: { connected: { address: connectedWalletAddress } },
-}) => ({
-  connectedWalletAddress,
-});
-
-export default connect(mapStateToProps)(FractionateButton);
+export default FractionateButton;
