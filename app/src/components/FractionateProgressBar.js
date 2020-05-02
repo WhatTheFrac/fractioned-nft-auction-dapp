@@ -5,6 +5,16 @@ import { Eth } from '@rimble/icons';
 import PropTypes from 'prop-types';
 
 const FractionateProgressBar = (props) => {
+  const SLOW_THRESHOLD = 0.9; // at what percentage the bar starts slowing down
+  const SLOW_FACTOR = 5; // how much slower the bar will go (5 = 1/5 rate)
+  const UPDATE_INTERVAL_MS = 1000; // how often to update the progress bar
+  const MAX_BAR_PROGRESS = 0.99; // the largest progress that will be shown
+
+  // calculate how long the bar takes to ease, should be half the update interval
+  const WIDTH_EASE_INTERVAL = (UPDATE_INTERVAL_MS / 2 / 1000).toFixed(1).toString() + "s";
+  // this style makes the bar move smoothly
+  const progressBarStyle = {transition: "width "+WIDTH_EASE_INTERVAL+" ease"};
+
   const {estimatedTimeInSeconds} = props;
 
   const getCurrentTime = () => Math.floor(Date.now() / 1000);
@@ -19,21 +29,20 @@ const FractionateProgressBar = (props) => {
   let timeElapsed = currentTime - startTime;
   let percentage = timeElapsed / estimatedTimeInSeconds;
 
-  // show accurate percentage up to a threshold then slow down the progress bar 10x
-  const SLOW_THRESHOLD = 0.9;
   let displayPercentage =
     percentage < SLOW_THRESHOLD
       ? percentage
-      : SLOW_THRESHOLD + (timeElapsed / (estimatedTimeInSeconds*10));
+      : SLOW_THRESHOLD + (timeElapsed - estimatedTimeInSeconds*SLOW_THRESHOLD) / (estimatedTimeInSeconds*SLOW_FACTOR);
 
-  displayPercentage = Math.min((displayPercentage*100).toFixed(0), 100);
+  displayPercentage = Math.min(displayPercentage, MAX_BAR_PROGRESS);
 
+  console.log("render");
 
-  setTimeout(updateCurrentTime, 1000);
+  setTimeout(updateCurrentTime, UPDATE_INTERVAL_MS);
 
   return (
     <Flex flexDirection={"column"}>
-      <Box bg={"success"} width={displayPercentage / 100} py={2} />
+      <Box bg={"success"} width={displayPercentage} style={progressBarStyle} py={2} />
       <Flex
         bg="primary"
         p={3}
@@ -52,7 +61,7 @@ const FractionateProgressBar = (props) => {
             justifyContent={"center"}
             alignItems={"center"}
           >
-            <Text>{displayPercentage}%</Text>
+            <Text>{(displayPercentage*100).toFixed(0)}%</Text>
           </Flex>
         </Box>
         <Box>
