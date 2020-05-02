@@ -1,38 +1,106 @@
-import React, { useState, useEffect } from 'react';
-import { Flex, Loader, Text, Avatar, Card, Button, Modal, Box, Heading, Image, Link, Icon, Tooltip} from 'rimble-ui';
-import PropTypes from 'prop-types';
+import React, { useState } from 'react';
+import { Flex, Loader, Text, Card, Button, Modal, Box, Heading, Link, Icon} from 'rimble-ui';
 import { connect } from 'react-redux';
 import { Eth } from '@rimble/icons';
 
-// utils
-import { getTokenBalance } from '../utils';
 import FractionateModalInfoRow from './FractionateModalInfoRow';
+import FractionateProgressBar from './FractionateProgressBar';
 
 const FractionateButton = (props) => {
-  const {
-  } = props;
+  const { } = props;
 
-  const [balance, setBalance] = useState(0);
-  const [isFetchingTokenBalance, setIsFetchingTokenBalance] = useState(true)
-
-
-  const [isOpen, setIsOpen] = useState(false);
+  const resetState = () => {
+    setShowMetamaskConfirm(false);
+    setTransactionInProgress(false);
+  }
 
   const closeModal = e => {
     e.preventDefault();
+    resetState();
     setIsOpen(false);
   };
 
   const openModal = e => {
     e.preventDefault();
+    resetState();
     setIsOpen(true);
   };
 
-  const fractionate = e => {
-    // TODO replace with the actual fractionate action
+  /*
+    HANDLING TRANSACTION AND VISUAL STATE
+    1. dialog opened
+    2. user clicks fractionate
+      -> userFractionateConfirm()
+        -> showMetamaskConfirm(true)
+    3. user confirms with metamask
+      -> metamaskConfirm()
+        -> showMetamaskConfirm(false) showProgressBar(true)
+      -> transactionComplete()
+        -> success dialog shows [this modal replaced by success modal]
+    4. user closes dialog
+
+    TODO handle failure
+  */
+  const [isOpen, setIsOpen] = useState(false);
+  const [showMetamaskConfirm, setShowMetamaskConfirm] = useState(false);
+  const [transactionInProgress, setTransactionInProgress] = useState(false);
+
+  const userFractionateConfirm = e => {
     e.preventDefault();
-    setIsOpen(false);
+    setShowMetamaskConfirm(true);
+    // try to execute transaction, request permission with metamask
   };
+
+  // TODO call this hook when the user actually does confirm with metamask instead of onclick below
+  const metamaskConfirm = e => {
+    e.preventDefault();
+    setShowMetamaskConfirm(false);
+    setTransactionInProgress(true);
+
+    // TODO take actual fractionate action
+  };
+
+  let metamaskConfirmIndicator = (
+    <Flex
+      p={3}
+      borderBottom={"1px solid gray"}
+      borderColor={"moon-gray"}
+      alignItems={"center"}
+      flexDirection={["column", "row"]}
+      onClick={metamaskConfirm}
+    >
+      <Box
+        position={"relative"}
+        height={"2em"}
+        width={"2em"}
+        mr={[0, 3]}
+        mb={[3, 0]}
+      >
+        <Box position={"absolute"} top={"0"} left={"0"}>
+          <Loader size={"2em"} />
+        </Box>
+      </Box>
+      <Box>
+        <Text
+          textAlign={["center", "left"]}
+          fontWeight={"600"}
+          fontSize={1}
+          lineHeight={"1.25em"}
+        >
+          Waiting for confirmation...
+        </Text>
+        <Link fontWeight={100} lineHeight={"1.25em"} color={"primary"}>
+          Don't see the MetaMask popup?
+        </Link>
+      </Box>
+    </Flex>
+  );
+
+  let header = transactionInProgress
+    ? <FractionateProgressBar estimatedTimeInSeconds={30} />
+    : <Box bg={"primary"} px={3} py={2}>
+        <Text color={"white"}>Summary of Fractionate</Text>
+      </Box>;
 
   return (
     <>
@@ -69,145 +137,28 @@ const FractionateButton = (props) => {
                 overflow={"hidden"}
                 my={[3, 4]}
               >
-                <Box bg={"primary"} px={3} py={2}>
-                  <Text color={"white"}>Summary of Fractionate</Text>
-                </Box>
-                <Flex
-                  p={3}
-                  borderBottom={"1px solid gray"}
-                  borderColor={"moon-gray"}
-                  alignItems={"center"}
-                  flexDirection={["column", "row"]}
-                >
-                  <Box
-                    position={"relative"}
-                    height={"2em"}
-                    width={"2em"}
-                    mr={[0, 3]}
-                    mb={[3, 0]}
-                  >
-                    <Box position={"absolute"} top={"0"} left={"0"}>
-                      <Loader size={"2em"} />
-                    </Box>
-                  </Box>
-                  <Box>
-                    <Text
-                      textAlign={["center", "left"]}
-                      fontWeight={"600"}
-                      fontSize={1}
-                      lineHeight={"1.25em"}
-                    >
-                      Waiting for confirmation...
-                    </Text>
-                    <Link fontWeight={100} lineHeight={"1.25em"} color={"primary"}>
-                      Don't see the MetaMask popup?
-                    </Link>
-                  </Box>
-                </Flex>
-                <Flex
-                  justifyContent={"space-between"}
-                  bg="near-white"
-                  py={[2, 3]}
-                  px={3}
-                  alignItems={"center"}
-                  borderBottom={"1px solid gray"}
-                  borderColor={"moon-gray"}
-                  flexDirection={["column", "row"]}
-                >
-                  <Text
-                    textAlign={["center", "left"]}
-                    color="near-black"
-                    fontWeight="bold"
-                  >
-                    Price
-                  </Text>
-                  <Flex
-                    alignItems={["center", "flex-end"]}
-                    flexDirection={["row", "column"]}
-                  >
-                    <Text
-                      mr={[2, 0]}
-                      color="near-black"
-                      fontWeight="bold"
-                      lineHeight={"1em"}
-                    >
-                      5.4 ETH
-                    </Text>
-                    <Text color="mid-gray" fontSize={1}>
-                      $1450 USD
-                    </Text>
-                  </Flex>
-                </Flex>
+                {header}
+                {showMetamaskConfirm ? metamaskConfirmIndicator : null}
                 <FractionateModalInfoRow
-                  title="Transaction Fee 2"
-                  description="Pays the Ethereum network to process your transaction. Spent even if the transaction fails."
-                  data="data2"
-                  secondaryData="secondayr data"
+                  title="Price"
+                  data="5.4 Eth"
+                  secondaryData="$1450 USD"
                 />
-                <Flex
-                  justifyContent={"space-between"}
-                  bg="light-gray"
-                  py={[2, 3]}
-                  px={3}
-                  alignItems={"center"}
-                  borderBottom={"1px solid gray"}
-                  borderColor={"moon-gray"}
-                  flexDirection={["column", "row"]}
-                >
-                  <Flex alignItems={"center"}>
-                    <Text
-                      textAlign={["center", "left"]}
-                      color="near-black"
-                      fontWeight="bold"
-                    >
-                      Transaction fee
-                    </Text>
-                    <Tooltip
-                      message="Pays the Ethereum network to process your transaction. Spent even if the transaction fails."
-                      position="top"
-                    >
-                      <Icon
-                        ml={1}
-                        name={"InfoOutline"}
-                        size={"14px"}
-                        color={"primary"}
-                      />
-                    </Tooltip>
-
-                  </Flex>
-                  <Flex
-                    alignItems={["center", "flex-end"]}
-                    flexDirection={["row", "column"]}
-                  >
-                    <Text
-                      mr={[2, 0]}
-                      color="near-black"
-                      fontWeight="bold"
-                      lineHeight={"1em"}
-                    >
-                      $0.42
-                    </Text>
-                    <Text color="mid-gray" fontSize={1}>
-                      0.00112 ETH
-                    </Text>
-                  </Flex>
-                </Flex>
-                <Flex
-                  justifyContent={"space-between"}
-                  bg={"near-white"}
-                  p={[2, 3]}
-                  alignItems={"center"}
-                  flexDirection={["column", "row"]}
-                >
-                  <Text color="near-black" fontWeight="bold">
-                    Estimated time
-                  </Text>
-                  <Text color={"mid-gray"}>Less than 2 minutes</Text>
-                </Flex>
+                <FractionateModalInfoRow
+                  title="Transaction Fee"
+                  description="Pays the Ethereum network to process your transaction. Spent even if the transaction fails."
+                  data="0.02 Eth"
+                  secondaryData="$0.18"
+                />
+                <FractionateModalInfoRow
+                  title="Estimated Time"
+                  description="Commiting changes to the blockchain requires your transaction to be mined."
+                  data="2 minutes"
+                />
               </Flex>
               <Flex justifyContent="flex-end">
                 <Button.Outline onClick={closeModal} mr={1}>Cancel</Button.Outline>
-                <Button onClick={closeModal}>Fractionate!</Button>
+                <Button onClick={userFractionateConfirm}>Fractionate!</Button>
               </Flex>
             </Flex>
           </Box>
@@ -218,6 +169,7 @@ const FractionateButton = (props) => {
 };
 
 FractionateButton.propTypes = {
+  // TODO
 };
 
 const mapStateToProps = ({

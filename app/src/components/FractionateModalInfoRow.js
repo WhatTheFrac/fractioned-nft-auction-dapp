@@ -1,12 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Flex, Loader, Text, Avatar, Card, Button, Modal, Box, Heading, Image, Link, Icon, Tooltip} from 'rimble-ui';
+import React from 'react';
+import { Flex, Text, Icon, Tooltip} from 'rimble-ui';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { Eth } from '@rimble/icons';
-
-// utils
-import { getTokenBalance } from '../utils';
-
 
 const FractionateModalInfoRow = (props) => {
   const {
@@ -15,9 +9,6 @@ const FractionateModalInfoRow = (props) => {
     data,
     secondaryData,
   } = props;
-
-  const [balance, setBalance] = useState(0);
-  const [isFetchingTokenBalance, setIsFetchingTokenBalance] = useState(true)
 
   let descriptionDisplay = description
     ? <Tooltip
@@ -83,8 +74,4 @@ FractionateModalInfoRow.propTypes = {
   secondaryData: PropTypes.string,
 };
 
-const mapStateToProps = ({
-}) => ({
-});
-
-export default connect(mapStateToProps)(FractionateModalInfoRow);
+export default (FractionateModalInfoRow);
