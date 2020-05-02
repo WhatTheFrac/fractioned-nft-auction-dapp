@@ -94,6 +94,15 @@ const FractionateButton = (props) => {
     return 15;
   };
 
+  const estimatedTimeForDisplay = () => {
+    let seconds = estimatedTransactionTimeSeconds();
+    if (seconds < 60) {
+      return seconds + " seconds";
+    }
+    // rounds up for number of minutes to be pessimistic
+    return Math.ceil(seconds / 60).toFixed(0) + " minutes"
+  }
+
   let metamaskConfirmIndicator = (
     <Flex
       p={3}
@@ -153,7 +162,7 @@ const FractionateButton = (props) => {
             </Flex>
             <Flex onClick={openFailureDialog}>
               <Heading textAlign="center" as="h1" fontSize={[2, 3]} px={[3, 0]}>
-                Confirm your purchase in [wallet]
+                Confirm your Transaction
               </Heading>
             </Flex>
             <Link onClick={closeModal}>
@@ -163,7 +172,7 @@ const FractionateButton = (props) => {
           <Box p={[3, 4]}>
             <Flex justifyContent={"space-between"} flexDirection={"column"}>
               <Text textAlign="center">
-                Double check the details here – this can't be undone!
+                Please look over the details of your Fractionalization – this can't be undone!
               </Text>
               <Flex
                 alignItems={"stretch"}
@@ -178,9 +187,16 @@ const FractionateButton = (props) => {
                 {header}
                 {showMetamaskConfirm ? metamaskConfirmIndicator : null}
                 <FractionateModalInfoRow
-                  title="Price"
-                  data="5.4 Eth"
-                  secondaryData="$1450 USD"
+                  title="NFT to deposit"
+                  description="This is the NFT for which this protocol will create fractional shares."
+                  data="The Black Argo"
+                  secondaryData="#121480970"
+                />
+                <FractionateModalInfoRow
+                  title="DAI to deposit"
+                  description="In order for people to purchase fractions of this NFT, this DAI will be sent to the balancer pool along with the NFT tokens."
+                  data="1,000 DAI"
+                  secondaryData="approximately $1,000"
                 />
                 <FractionateModalInfoRow
                   title="Transaction Fee"
@@ -190,8 +206,8 @@ const FractionateButton = (props) => {
                 />
                 <FractionateModalInfoRow
                   title="Estimated Time"
-                  description="Commiting changes to the blockchain requires your transaction to be mined."
-                  data="2 minutes"
+                  description="Commiting changes to the blockchain requires time for your transaction to be mined."
+                  data={estimatedTimeForDisplay()}
                 />
               </Flex>
               <Flex justifyContent="flex-end">

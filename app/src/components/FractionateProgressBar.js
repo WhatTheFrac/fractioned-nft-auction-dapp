@@ -79,6 +79,7 @@ const FractionateProgressBar = (props) => {
               ml={[0, 3]}
               fontSize={1}
               lineHeight={"1.25em"}
+              target="_blank"
               href="https://etherscan.io"
             >
               Details

@@ -42,9 +42,11 @@ const FractionateFailureDialog = (props) => {
           flexDirection={["column", "row"]}
           alignItems="center"
         >
-          <Button.Outline mr={[0, 3]} mb={[2, 0]} width={["100%", "auto"]}>
-            View on Etherscan
-          </Button.Outline>
+          <Link href="https://etherscan.io/" target="_blank">
+            <Button.Outline mr={[0, 3]} mb={[2, 0]} width={["100%", "auto"]}>
+              View on Etherscan
+            </Button.Outline>
+          </Link>
           <Button onClick={closeHook} width={["100%", "auto"]}>Try again</Button>
         </Flex>
       </Card>

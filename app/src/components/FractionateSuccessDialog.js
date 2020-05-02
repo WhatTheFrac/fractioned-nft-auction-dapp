@@ -35,7 +35,7 @@ const FractionateSuccessDialog = (props) => {
           </Text>
           <Flex mt={4} justifyContent="center">
             <Card p={3} borderRadius={16}>
-              <Image src="/images/devcon-ticket-example.png" size="156px" />
+              <Image src="logo512.png" size="156px" />
             </Card>
           </Flex>
         </Box>
@@ -43,7 +43,6 @@ const FractionateSuccessDialog = (props) => {
           <Heading textAlign="center" as="h4">
             Fractional NFTs
           </Heading>
-          <Link textAlign="center" href="https://balancer.exchange/">See Balancer pool</Link>
         </Flex>
         <Flex
           pt={[4, 4]}
@@ -55,10 +54,12 @@ const FractionateSuccessDialog = (props) => {
           flexDirection={["column", "row"]}
           alignItems="center"
         >
-          <Button.Outline mr={[0, 3]} mb={[2, 0]} width={["100%", "auto"]}>
-            Gift your ticket
+          <Button.Outline onClick={closeHook} mr={[0, 3]} mb={[2, 0]} width={["100%", "auto"]}>
+            Close
           </Button.Outline>
-          <Button width={["100%", "auto"]}>Share</Button>
+          <Link href="https://balancer.exchange/" target="_blank">
+            <Button width={["100%", "auto"]}>See Balancer pool</Button>
+          </Link>
         </Flex>
       </Card>
     </Modal>
