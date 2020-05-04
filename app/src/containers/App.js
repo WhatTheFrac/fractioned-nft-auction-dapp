@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import ConnectionBanner from '@rimble/connection-banner';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Loader, Box } from 'rimble-ui';
+import { Loader, Box, Flex, Text } from 'rimble-ui';
 import isEmpty from 'lodash/isEmpty';
 
 // components
@@ -11,6 +11,7 @@ import Wallet from '../components/Wallet';
 import NftAssetsSelect from '../components/NftAssetsSelect';
 import TokenBalance from '../components/TokenBalance';
 import FractionateButton from '../components/FractionateButton';
+import Tabs from '../components/Tabs';
 
 // utils
 import { isSupportedBrowser } from '../utils';
@@ -18,13 +19,11 @@ import { isSupportedBrowser } from '../utils';
 // actions
 import { getConnectedWalletAction } from '../actions/walletActions';
 
-
-const Wrapper = styled.div`
-  height: 100vh;
+const PageWrapper = styled.div`
+  height: 80vh;
   display: flex;
-  align-items: center;
   justify-content: center;
-  flex-direction: row;
+  margin: 10vw 10vh;
 `;
 
 const App = (props) => {
@@ -51,11 +50,11 @@ const App = (props) => {
 
   const isWalletConnected = !isEmpty(connectedWallet);
 
-  return (
-    <Wrapper>
-      {appLoading && <Loader size={70} />}
-      {!appLoading && (
-        <Box>
+  let tabData = [
+    {
+      title: "Fractionate",
+      content: (
+        <Flex flexDirection="column" justifyContent="center">
           <Wallet />
           {isWalletConnected && (
             <>
@@ -72,9 +71,22 @@ const App = (props) => {
             </>
           )}
           <FractionateButton />
-        </Box>
-      )}
-    </Wrapper>
+        </Flex>
+      )
+    },
+    {
+      title: "Pool",
+      content: (
+        <Text>The Balancer pool!!!!!!!!!</Text>
+      )
+    }
+  ];
+
+  return (
+    <PageWrapper>
+      {appLoading && <Loader size={70} />}
+      {!appLoading && (<Tabs tabData={tabData} />)}
+    </PageWrapper>
   );
 };
 
