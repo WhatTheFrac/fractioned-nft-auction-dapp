@@ -16,13 +16,18 @@ const TabButton = styled.button`
   padding: 10px 0px;
   border-radius: 15px;
   cursor: pointer;
+  flex: 1;
   &:focus {
     outline: none;
   }
   ${({ isActive }) => `
     color: ${isActive ? '#fff' : '#000'};
-    background-color: ${isActive ? theme.colors.primary : 'none'};
+    background: ${isActive ? theme.colors.primary : 'none'};
   `}
+  &:hover {
+    color: #fff;
+    background: ${theme.colors.primary};
+  }
 `;
 
 const TabsWrapper = styled.div`
@@ -33,12 +38,9 @@ const TabsWrapper = styled.div`
   background: #eee;
   border-radius: 15px;
   overflow: hidden;
-  ${TabButton} {
-    flex: 1;
-  }
-  ${TabButton}:hover {
-    color: #fff;
-    background-color: ${theme.colors.primary};
+  &:hover > ${TabButton}:not(:hover) {
+    color: #000;
+    background: none;
   }
 `;
 const Tabs = ({ tabData }) => {

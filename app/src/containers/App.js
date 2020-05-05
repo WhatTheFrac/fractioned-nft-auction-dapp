@@ -70,8 +70,8 @@ const App = (props) => {
       content: isWalletConnected && <FractionateForm />
     },
     {
-      title: "Pool",
-      content: <Text>(╯°□°)╯︵ [The Balancer pool]</Text>,
+      title: "Sell",
+      content: <Text textAlign="center">(╯°□°)╯︵ [AUCTION]</Text>,
     }
   ];
 

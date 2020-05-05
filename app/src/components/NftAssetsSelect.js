@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flex, Loader, Text, Avatar } from 'rimble-ui';
+import { Flex, Loader, Text, Avatar, theme } from 'rimble-ui';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import SelectSearch from 'react-select-search';
@@ -23,6 +23,10 @@ const SelectedOptionWrapper = styled(Flex)`
   }
 `;
 
+const StyledInput = styled.input`
+  color: ${theme.colors.text};
+`;
+
 const renderOptionImage = (option) => <CircleImage src={option.image} size={25} backgroundColor={option.backgroundColor} mr={2} />;
 
 const renderOption = (props, option, snapshot, className) => (
@@ -34,13 +38,15 @@ const renderOption = (props, option, snapshot, className) => (
   </button>
 );
 
-const NftAssetsSelect = (props) => {
-  const { assets, isFetching } = props;
-
+const NftAssetsSelect = ({
+  assets,
+  isFetching,
+  onChange,
+}) => {
   const selectOptions = assets.map((asset) => {
-    const { title: name, tokenAddress, tokenId, backgroundColor, image } = asset;
+    const { title: name, uid, backgroundColor, image } = asset;
     return {
-      value: `${tokenAddress}-${tokenId}`,
+      value: uid,
       name,
       backgroundColor,
       image,
@@ -64,7 +70,7 @@ const NftAssetsSelect = (props) => {
     return (
       <SelectedOptionWrapper>
         {value && renderOptionImage(value)}
-        <input
+        <StyledInput
           {...valueProps}
           style={{ flex: 1 }}
           className={className}
@@ -82,6 +88,7 @@ const NftAssetsSelect = (props) => {
       disabled={selectDisabled}
       renderOption={renderOption}
       renderValue={renderSelectedOption}
+      onChange={onChange}
       search
     />
   );
@@ -90,6 +97,7 @@ const NftAssetsSelect = (props) => {
 NftAssetsSelect.propTypes = {
   isFetching: PropTypes.bool,
   assets: PropTypes.array,
+  onChange: PropTypes.func,
 };
 
 const mapStateToProps = ({

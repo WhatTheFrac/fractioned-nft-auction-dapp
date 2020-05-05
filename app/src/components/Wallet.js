@@ -1,13 +1,35 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Blockie, MetaMaskButton, Flex, Card, Box, Text, Loader } from 'rimble-ui';
+import { Flash, Button, Flex, Card, Box, Text, Loader } from 'rimble-ui';
 import isEmpty from 'lodash/isEmpty';
+import styled from 'styled-components';
+
+// components
+import TokenBalance from './TokenBalance';
 
 // actions
 import { connectWalletAction } from '../actions/walletActions';
+
+// utils
 import { getNetworkNameById, truncateHexString } from '../utils';
 
+
+const BoxWrapper = styled(Box)`
+  border: 1px solid #ddd;
+  border-radius: 5px;
+`;
+
+const ConnectedStatus = styled(Flash)`
+  margin-left: 10px;
+  padding: 2px 25px;
+`;
+
+const InlineSeparator = styled.div`
+  height: 1px;
+  background: #ddd;
+  margin: 10px -15px;
+`;
 
 const Wallet = (props) => {
   const {
@@ -17,26 +39,31 @@ const Wallet = (props) => {
       isConnecting,
     },
   } = props;
+  const connectedNetworkValue = connectedWallet.networkId === 1
+    ? 'Connected'
+    : `Connected (${getNetworkNameById(connectedWallet.networkId)})`;
   return (
-    <Flex flexDirection="column" justifyContent="center" alignItems="center">
+    <>
       {isEmpty(connectedWallet) && !isConnecting && (
-        <MetaMaskButton.Outline onClick={connectWallet}>
-          Connect with MetaMask
-        </MetaMaskButton.Outline>
+        <Button.Outline size="small" onClick={connectWallet}>Connect wallet</Button.Outline>
       )}
       {!isEmpty(connectedWallet) && !isConnecting && (
-        <Card>
-          <Flex>
-            <Blockie opts={{ seed: connectedWallet.address, size: 20 }} />
-            <Box pl={2} pt={2}>
-              <Text>Connected Address: {truncateHexString(connectedWallet.address)}</Text>
-              <Text fontSize={1}>Network: {getNetworkNameById(connectedWallet.networkId)}</Text>
-            </Box>
+        <BoxWrapper px={15} py={2}>
+          <Flex justifyContent="center" alignItems="center">
+            <Text color="#605e69">{truncateHexString(connectedWallet.address)}</Text>
+            <ConnectedStatus variant="success">{connectedNetworkValue}</ConnectedStatus>
           </Flex>
-        </Card>
+          <InlineSeparator />
+          <TokenBalance
+            symbol={process.env.REACT_APP_ACCEPTED_TOKEN_SYMBOL}
+            address={process.env.REACT_APP_ACCEPTED_TOKEN_ADDRESS}
+            decimals={Number(process.env.REACT_APP_ACCEPTED_TOKEN_DECIMALS)}
+            noLogo
+          />
+        </BoxWrapper>
       )}
-      {isConnecting && <Loader mt={2} size={40} />}
-    </Flex>
+      {isConnecting && <Loader mt={2} size={20} />}
+    </>
   );
 };
 

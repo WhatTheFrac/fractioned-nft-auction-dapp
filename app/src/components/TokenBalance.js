@@ -7,14 +7,13 @@ import { connect } from 'react-redux';
 import { getTokenBalance } from '../utils';
 
 
-const TokenBalance = (props) => {
-  const {
-    symbol,
-    address,
-    decimals,
-    connectedWalletAddress,
-  } = props;
-
+const TokenBalance = ({
+  symbol,
+  address,
+  decimals,
+  connectedWalletAddress,
+  noLogo,
+}) => {
   const [balance, setBalance] = useState(0);
   const [isFetchingTokenBalance, setIsFetchingTokenBalance] = useState(true)
 
@@ -28,13 +27,12 @@ const TokenBalance = (props) => {
   }, [connectedWalletAddress])
 
   return (
-    <Card>
-      <Flex alignItems="center">
-        <Avatar src={`https://airswap-token-images.s3.amazonaws.com/${symbol}.png`} mr={2} />
-        <Text mt={1}>{symbol} balance: {!isFetchingTokenBalance && balance.toFixed(6)}</Text>
-        {isFetchingTokenBalance && <Loader ml={3} size={20} />}
-      </Flex>
-    </Card>
+    <Flex alignItems="center" flexWrap="wrap">
+      {!noLogo && <Avatar src={`https://airswap-token-images.s3.amazonaws.com/${symbol}.png`} mr={2} />}
+      <Text style={{ flex: 1 }}>{symbol} Balance</Text>
+      {!isFetchingTokenBalance && <Text textAlign="right">{balance.toFixed(6)}</Text>}
+      {isFetchingTokenBalance && <Loader ml={3} size={20} />}
+    </Flex>
   );
 };
 
@@ -43,6 +41,7 @@ TokenBalance.propTypes = {
   symbol: PropTypes.string.isRequired,
   address: PropTypes.string.isRequired,
   decimals: PropTypes.number.isRequired,
+  noLogo: PropTypes.bool,
 };
 
 const mapStateToProps = ({
