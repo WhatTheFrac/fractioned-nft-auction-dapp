@@ -12,19 +12,24 @@ const CircleImage = styled(Avatar)`
 
 const SelectedOptionWrapper = styled(Flex)`
   cursor: pointer;
-  height: 56px;
+  height: 3rem;
   padding: 10px 16px;
-  box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
-  border: 1px solid #eee;
+  border: 1px solid transparent;
+  border-color: #ccc;
+  border-radius: 4px;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+  &:hover {
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.3);
+  }
 `;
 
-const renderOptionImage = (option) => <CircleImage src={option.image} backgroundColor={option.backgroundColor} mr={2} />;
+const renderOptionImage = (option) => <CircleImage src={option.image} size={25} backgroundColor={option.backgroundColor} mr={2} />;
 
 const renderOption = (props, option, snapshot, className) => (
   <button {...props} className={className} type="button">
     <Flex>
       {renderOptionImage(option)}
-      <Text mt={1}>{option.name}</Text>
+      <Text mt={0.5}>{option.name}</Text>
     </Flex>
   </button>
 );

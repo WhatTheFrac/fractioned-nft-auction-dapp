@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { Flex, Loader, Text, Card, Button, Modal, Box, Heading, Link, Icon} from 'rimble-ui';
 import { Eth } from '@rimble/icons';
+import PropTypes from 'prop-types';
 
 import FractionateModalInfoRow from './FractionateModalInfoRow';
 import FractionateProgressBar from './FractionateProgressBar';
 import FractionateSuccessDialog from './FractionateSuccessDialog';
 import FractionateFailureDialog from './FractionateFailureDialog';
 
-const FractionateButton = (props) => {
+
+const FractionateButton = ({
+  buttonProps,
+}) => {
   // TODO const { } = props;
 
   const resetState = () => {
@@ -147,7 +151,7 @@ const FractionateButton = (props) => {
 
   return (
     <>
-      <Button onClick={openModal}>Fractionate</Button>
+      <Button onClick={openModal} {...buttonProps || []}>Fractionate</Button>
       <Modal isOpen={isOpen}>
         <Card borderRadius={1} p={0} width={600}>
           <Flex
@@ -228,7 +232,7 @@ const FractionateButton = (props) => {
 };
 
 FractionateButton.propTypes = {
-  // TODO
+  buttonProps: PropTypes.object,
 };
 
 export default FractionateButton;

@@ -49,9 +49,9 @@
     border: none;
     outline: none;
     font-family: 'Baloo Tamma 2';
-    font-size: 18px;
+    font-size: 1rem;
     text-align: left;
-    line-height: 56px;
+    line-height: initial;
     -webkit-appearance: none;
 }
 
@@ -115,7 +115,7 @@
 
 .select-search__option {
     display: block;
-    height: 56px;
+    height: 3rem;
     width: 100%;
     padding: 10px 16px;
     background: #fff;

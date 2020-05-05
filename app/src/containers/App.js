@@ -8,9 +8,7 @@ import isEmpty from 'lodash/isEmpty';
 
 // components
 import Wallet from '../components/Wallet';
-import NftAssetsSelect from '../components/NftAssetsSelect';
-import TokenBalance from '../components/TokenBalance';
-import FractionateButton from '../components/FractionateButton';
+import FractionateForm from '../components/FractionateForm';
 import Tabs from '../components/Tabs';
 
 // utils
@@ -19,11 +17,25 @@ import { isSupportedBrowser } from '../utils';
 // actions
 import { getConnectedWalletAction } from '../actions/walletActions';
 
+
 const PageWrapper = styled.div`
   height: 80vh;
   display: flex;
   justify-content: center;
   margin: 10vw 10vh;
+`;
+
+const CenteredPageWrapper = styled.div`
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const TopRight = styled.div`
+  position: absolute;
+  top: 10px;
+  right: 50px;
 `;
 
 const App = (props) => {
@@ -40,11 +52,13 @@ const App = (props) => {
 
   if (!isSupportedBrowser) {
     return (
-      <ConnectionBanner
-        currentNetwork={3}
-        requiredNetwork={1}
-        onWeb3Fallback={true}
-      />
+      <CenteredPageWrapper>
+        <ConnectionBanner
+          currentNetwork={3}
+          requiredNetwork={1}
+          onWeb3Fallback={true}
+        />
+      </CenteredPageWrapper>
     );
   }
 
@@ -53,39 +67,27 @@ const App = (props) => {
   let tabData = [
     {
       title: "Fractionate",
-      content: (
-        <Flex flexDirection="column" justifyContent="center">
-          <Wallet />
-          {isWalletConnected && (
-            <>
-              <Box mt={3}>
-                <TokenBalance
-                  symbol={process.env.REACT_APP_ACCEPTED_TOKEN_SYMBOL}
-                  address={process.env.REACT_APP_ACCEPTED_TOKEN_ADDRESS}
-                  decimals={Number(process.env.REACT_APP_ACCEPTED_TOKEN_DECIMALS)}
-                />
-              </Box>
-              <Box mt={3}>
-                <NftAssetsSelect borderless />
-              </Box>
-            </>
-          )}
-          <FractionateButton />
-        </Flex>
-      )
+      content: isWalletConnected && <FractionateForm />
     },
     {
       title: "Pool",
-      content: (
-        <Text>The Balancer pool!!!!!!!!!</Text>
-      )
+      content: <Text>(╯°□°)╯︵ [The Balancer pool]</Text>,
     }
   ];
 
   return (
     <PageWrapper>
       {appLoading && <Loader size={70} />}
-      {!appLoading && (<Tabs tabData={tabData} />)}
+      {!appLoading && (
+        <>
+          <TopRight>
+            <Wallet />
+          </TopRight>
+          <Box width={700}>
+            <Tabs tabData={tabData} />
+          </Box>
+        </>
+      )}
     </PageWrapper>
   );
 };
