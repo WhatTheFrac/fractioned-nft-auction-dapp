@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flex, Loader, Text, Avatar } from 'rimble-ui';
+import { Flex, Loader, Text, Avatar, theme } from 'rimble-ui';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import SelectSearch from 'react-select-search';
@@ -12,30 +12,41 @@ const CircleImage = styled(Avatar)`
 
 const SelectedOptionWrapper = styled(Flex)`
   cursor: pointer;
-  height: 56px;
+  height: 3rem;
   padding: 10px 16px;
-  box-shadow: 0px 8px 16px rgba(0,0,0,0.1);
-  border: 1px solid #eee;
+  border: 1px solid transparent;
+  border-color: #ccc;
+  border-radius: 4px;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+  &:hover {
+    box-shadow: 0px 2px 6px rgba(0,0,0,0.3);
+  }
 `;
 
-const renderOptionImage = (option) => <CircleImage src={option.image} backgroundColor={option.backgroundColor} mr={2} />;
+const StyledInput = styled.input`
+  color: ${theme.colors.text};
+`;
+
+const renderOptionImage = (option) => <CircleImage src={option.image} size={25} backgroundColor={option.backgroundColor} mr={2} />;
 
 const renderOption = (props, option, snapshot, className) => (
   <button {...props} className={className} type="button">
     <Flex>
       {renderOptionImage(option)}
-      <Text mt={1}>{option.name}</Text>
+      <Text mt={0.5}>{option.name}</Text>
     </Flex>
   </button>
 );
 
-const NftAssetsSelect = (props) => {
-  const { assets, isFetching } = props;
-
+const NftAssetsSelect = ({
+  assets,
+  isFetching,
+  onChange,
+}) => {
   const selectOptions = assets.map((asset) => {
-    const { title: name, tokenAddress, tokenId, backgroundColor, image } = asset;
+    const { title: name, uid, backgroundColor, image } = asset;
     return {
-      value: `${tokenAddress}-${tokenId}`,
+      value: uid,
       name,
       backgroundColor,
       image,
@@ -59,7 +70,7 @@ const NftAssetsSelect = (props) => {
     return (
       <SelectedOptionWrapper>
         {value && renderOptionImage(value)}
-        <input
+        <StyledInput
           {...valueProps}
           style={{ flex: 1 }}
           className={className}
@@ -77,6 +88,7 @@ const NftAssetsSelect = (props) => {
       disabled={selectDisabled}
       renderOption={renderOption}
       renderValue={renderSelectedOption}
+      onChange={onChange}
       search
     />
   );
@@ -85,6 +97,7 @@ const NftAssetsSelect = (props) => {
 NftAssetsSelect.propTypes = {
   isFetching: PropTypes.bool,
   assets: PropTypes.array,
+  onChange: PropTypes.func,
 };
 
 const mapStateToProps = ({

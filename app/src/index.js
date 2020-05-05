@@ -25,7 +25,7 @@ const customTheme = Object.assign({}, theme, {
   },
 });
 const GlobalStyle = createGlobalStyle`
-  body {
+  body, input, textarea {
     font-family: 'Baloo Tamma 2';
   }
   

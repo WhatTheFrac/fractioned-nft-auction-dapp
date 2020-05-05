@@ -16,6 +16,7 @@ const mapFromOpenSea = ({
 }) => {
   const attributes = traits.map(({ trait_type: title, value }) => ({ title, value }));
   return {
+    uid: `${tokenAddress}-${tokenId}`,
     title: name || 'Unnamed ERC-721',
     backgroundColor,
     image: image || preview,
