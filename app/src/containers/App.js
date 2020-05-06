@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import ConnectionBanner from '@rimble/connection-banner';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Loader, Box, Flex, Text } from 'rimble-ui';
+import { Loader, Box, Flex, Text, Flash } from 'rimble-ui';
 import isEmpty from 'lodash/isEmpty';
 
 // components
@@ -36,7 +36,11 @@ const TopRight = styled.div`
   position: absolute;
   top: 10px;
   right: 50px;
+  background: white;
+  z-index: 1000000;
 `;
+
+const CONTENT_WIDTH = 700;
 
 const App = (props) => {
   const { getConnectedWallet, connectedWallet } = props;
@@ -79,14 +83,17 @@ const App = (props) => {
     <PageWrapper>
       {appLoading && <Loader size={70} />}
       {!appLoading && (
-        <>
+        <Flex flexDirection="column" width={CONTENT_WIDTH}>
           <TopRight>
             <Wallet />
           </TopRight>
-          <Box width={700}>
+          <Flash my={3} variant="danger">
+            This is untested, and is not garunteed to work. Do not use with any real funds or items.
+          </Flash>
+          <Box width={CONTENT_WIDTH}>
             <Tabs tabData={tabData} />
           </Box>
-        </>
+        </Flex>
       )}
     </PageWrapper>
   );
