@@ -90,7 +90,7 @@ const App = (props) => {
           <Flash my={3} variant="danger">
             This is untested, and is not garunteed to work. Do not use with any real funds or items.
           </Flash>
-          <Box width={CONTENT_WIDTH}>
+          <Box>
             <Tabs tabData={tabData} />
           </Box>
         </Flex>
