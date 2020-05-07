@@ -18,7 +18,7 @@ contract Fracker {
         address token;
     }
 
-    FrackedToken[] frackedTokens;
+    FrackedToken[] public frackedTokens;
 
     /**
         @dev Function is public because external gives stack too deep errors
