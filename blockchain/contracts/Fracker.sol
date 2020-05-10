@@ -1,45 +1,57 @@
-pragma solidity 0.6.6;
+pragma solidity 0.6.4;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@pie-dao/smart-pools/contracts/smart-pools/PBasicSmartPool.sol";
 import "./aragon-minime/MiniMeToken.sol";
+import "./interfaces/IBFactory.sol";
 import "./interfaces/INFTReceiver.sol";
 import "./interfaces/ITokenReceiver.sol";
 
 contract Fracker {
-
     using Address for address;
 
+    uint256 public constant BALANCER_98 = 49 * 10 ** 18;
+    uint256 public constant BALANCER_2 = 1 * 10 ** 18;
+    uint256 public constant BALANCER_100 = 50 * 10 ** 18;
+
     struct FrackedToken {
-        address nftAddress;
-        uint256 nftId;
-        address nftReceiver;
-        address tokenReceiver;
+        // address nftAddress;
+        // uint256 nftId;
+        // address nftReceiver;
         address token;
+        IBPool balancerPool;
+        PBasicSmartPool smartPool;
     }
 
     FrackedToken[] public frackedTokens;
+    IBFactory public balancerFactory;
+
+    constructor(address _balancerFactory) public {
+        balancerFactory = IBFactory(_balancerFactory);
+    }
 
     /**
         @dev Function is public because external gives stack too deep errors
     */
     function fractionalize(
-        address _nftAddress,
-        uint256 _nftId,
-        address _nftReceiver,
-        bytes memory _nftReceiverData,
+        // address _nftAddress,
+        // uint256 _nftId,
+        // address _nftReceiver,
+        // bytes memory _nftReceiverData,
         string memory _tokenName,
         string memory _symbol,
         uint256 _initialSupply,
-        address _tokenReceiver,
-        bytes memory _tokenReceiverData
+        address _poolToken, // e.g DAI
+        uint256 _targetPrice // estimated value of nft
     ) public {
-        IERC721 nftContract = IERC721(_nftAddress);
+        // IERC721 nftContract = IERC721(_nftAddress);
         // Pull NFT
-        nftContract.transferFrom(msg.sender, address(this), _nftId);
+        // nftContract.transferFrom(msg.sender, address(this), _nftId);
         // Allow NFT contract to pull token
-        nftContract.approve(_nftReceiver, _nftId);
+        // nftContract.approve(_nftReceiver, _nftId);
 
+        // TODO use proxy to save gas
         // Create token
         MiniMeToken token = new MiniMeToken(
             address(0), // Not using clone token factory
@@ -53,34 +65,49 @@ contract Fracker {
 
         // Set fracked token data
         FrackedToken storage frackedTokenData = frackedTokens.push();
-        frackedTokenData.nftAddress = _nftAddress;
-        frackedTokenData.nftId = _nftId;
-        frackedTokenData.nftReceiver = _nftReceiver;
-        frackedTokenData.tokenReceiver = _tokenReceiver;
+        // frackedTokenData.nftAddress = _nftAddress;
+        // frackedTokenData.nftId = _nftId;
+        // frackedTokenData.nftReceiver = _nftReceiver;
+        // frackedTokenData.tokenReceiver = _tokenReceiver;
         frackedTokenData.token = address(token);
 
         // Mint tokens
         token.generateTokens(address(this), _initialSupply);
-        // Approve tokens
-        token.approve(_tokenReceiver, uint256(-1));
 
-        // Call Token receiving contract with data payload
-        if(_tokenReceiver.isContract()) {
-            ITokenReceiver(_tokenReceiver).receiveTokens(frackedTokens.length - 1, address(token), _initialSupply, _tokenReceiverData);
-        } else {
-            token.transfer(_tokenReceiver, _initialSupply);
-        }
+        // Copy to memory to save gas on storage reads
+        IBPool balancerPool = IBPool(balancerFactory.newBPool());
+        frackedTokenData.balancerPool = balancerPool;
 
-        // Call NFT Receiving contract with data payload
-        if(_nftReceiver.isContract()) {
-            INFTReceiver(_nftReceiver).receiveNFT(frackedTokens.length - 1, address(token), _initialSupply, _nftReceiverData);
-        } else {
-            token.transfer(_nftReceiver, _nftId);
-        }
+        // // Bind fraction token
+        token.approve(address(balancerPool), _initialSupply);
+        balancerPool.bind(address(token), _initialSupply, BALANCER_98);
+
+        // Amount of pool token should be 2%
+        uint256 poolTokenAmount = _targetPrice * 2 / 100;
+        IERC20 poolToken = IERC20(_poolToken);
+        // Bind other token
+        poolToken.transferFrom(msg.sender, address(this), poolTokenAmount);
+        poolToken.approve(address(balancerPool), poolTokenAmount);
+        balancerPool.bind(address(poolToken), poolTokenAmount, BALANCER_2);
+
+
+        // TODO deploy smart pool through proxy to save gas
+        // Deploy smart pool
+        // PBasicSmartPool smartPool = new PBasicSmartPool();
+        // // Init smart pool
+        // // TODO better symbol and name
+        // smartPool.init(address(balancerPool), "WTF", "WTF", _initialSupply);
+        // // Send pool tokens to msg.sender
+        // smartPool.transfer(msg.sender, _initialSupply);
+        // // Enable trading
+        // smartPool.setPublicSwap(true);
+        // frackedTokenData.smartPool = smartPool;
+
     }
 
-    // Boiler plate controller methods
 
+
+    // Boiler plate controller methods
     function proxyPayment(address) external payable returns(bool) {return true;}
     function onTransfer(address, address, uint256) external pure returns(bool) {return true;}
     function onApprove(address, address, uint) external pure returns(bool) {return true;}

@@ -18,7 +18,7 @@ interface ExtendedBuidlerConfig extends BuidlerConfig {
 const config: ExtendedBuidlerConfig = {
   defaultNetwork: "buidlerevm",
   solc: {
-    version: "0.6.6",
+    version: "0.6.4",
     
   },
   networks: {
