@@ -1,5 +1,6 @@
 import Web3 from 'web3';
 import isEmpty from 'lodash/isEmpty';
+import toLower from 'lodash/toLower';
 
 // assets
 import erc20Abi from '../assets/abi/erc20.json';
@@ -52,3 +53,23 @@ export const getTokenBalance = (
 ) => getERC20Contract(tokenAddress).methods.balanceOf(walletAddress).call()
     .then((balanceInWei) => Number(tokenDecimals > 0 ? Number(balanceInWei) / (10 ** tokenDecimals) : balanceInWei))
     .catch(() => 0);
+
+export const parseNumberInputValue = (rawValue, noDecimals) => {
+  let value = rawValue
+    .replace(/[^0-9.,]+/g, '')
+    .replace(/[,]+/g, '.');
+  if (noDecimals) {
+    value = value.replace(/[.]+/g, '');
+  } else if (value.indexOf('.') !== value.lastIndexOf('.')) {
+    const [first, ...rest] = value.split('.');
+    value = `${first}.${rest.join('')}`;
+  }
+  if (!value) value = '';
+  return value;
+};
+
+export const isCaseInsensitiveEqual = (a, b) => {
+  if (!a || !b) return false;
+  if (a === b) return true;
+  return toLower(a) === toLower(b);
+};

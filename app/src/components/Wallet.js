@@ -39,9 +39,19 @@ const Wallet = (props) => {
       isConnecting,
     },
   } = props;
+
   const connectedNetworkValue = connectedWallet.networkId === 1
     ? 'Connected'
     : `Connected (${getNetworkNameById(connectedWallet.networkId)})`;
+
+  const {
+    REACT_APP_ACCEPTED_TOKEN_SYMBOL: symbol,
+    REACT_APP_ACCEPTED_TOKEN_DECIMALS: decimals,
+    REACT_APP_ACCEPTED_TOKEN_ADDRESS_MAINNET: addressMainnet,
+    REACT_APP_ACCEPTED_TOKEN_ADDRESS_RINKEBY: addressRinkeby,
+  } = process.env;
+  const address = connectedWallet.networkId === 0 ? addressMainnet : addressRinkeby;
+
   return (
     <>
       {isEmpty(connectedWallet) && !isConnecting && (
@@ -55,9 +65,9 @@ const Wallet = (props) => {
           </Flex>
           <InlineSeparator />
           <TokenBalance
-            symbol={process.env.REACT_APP_ACCEPTED_TOKEN_SYMBOL}
-            address={process.env.REACT_APP_ACCEPTED_TOKEN_ADDRESS}
-            decimals={Number(process.env.REACT_APP_ACCEPTED_TOKEN_DECIMALS)}
+            address={address}
+            symbol={symbol}
+            decimals={decimals}
             noLogo
           />
         </BoxWrapper>

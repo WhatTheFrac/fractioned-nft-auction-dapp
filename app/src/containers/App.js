@@ -52,6 +52,11 @@ const App = (props) => {
       getConnectedWallet();
       setAppLoading(false);
     }
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', () => {
+        getConnectedWallet();
+      });
+    }
   }, [appLoading]);
 
   if (!isSupportedBrowser) {
@@ -88,7 +93,7 @@ const App = (props) => {
             <Wallet />
           </TopRight>
           <Flash my={3} variant="danger">
-            This is untested, and is not garunteed to work. Do not use with any real funds or items.
+            This is untested and is not guaranteed to work. Do not use with any real funds or items.
           </Flash>
           <Box>
             <Tabs tabData={tabData} />

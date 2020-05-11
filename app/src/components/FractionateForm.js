@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Field, Input, Card, Flex, Heading, Text, Avatar } from 'rimble-ui';
-import { Icon } from '@rimble/icons';
 import isEmpty from 'lodash/isEmpty';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
 // components
 import NftAssetsSelect from './NftAssetsSelect';
 import FractionateButton from './FractionateButton';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+
+// utils
+import { parseNumberInputValue } from '../utils';
 
 
 const FormWrapper = styled.div`
@@ -40,8 +42,9 @@ const StatusText = styled(Text)`
 const FractionateForm = ({ nftAssets }) => {
   const [estimatedValue, setEstimatedValue] = useState('');
   const [fractionValue, setFractionValue] = useState('');
-  const [selectedNftKey, setSelectedNftKey] = useState('');
-  const selectedNft = nftAssets.find(({ uid }) => uid === selectedNftKey);
+  const [selectedNftId, setSelectedNftId] = useState('');
+  const selectedNft = nftAssets.find(({ uid }) => uid === selectedNftId);
+  const submitDisabled = isEmpty(selectedNft) || isEmpty(estimatedValue);
   return (
     <Flex flexDirection="column" justifyContent="center" alignItems="center">
       <FormWrapper>
@@ -49,26 +52,26 @@ const FractionateForm = ({ nftAssets }) => {
         <InputWrapper mt={3}>
           <Flex flexWrap="wrap" width="100%">
             <Field label="NFT" style={{ flex: 0.52 }}>
-              <NftAssetsSelect borderless required onChange={setSelectedNftKey} />
+              <NftAssetsSelect borderless required onChange={setSelectedNftId} />
             </Field>
             <Text style={{ flex: 0.05 }} textAlign="center" mt={40} px={15} fontSize={24} color={'#d2d2d2'}>=</Text>
             <Field label="Estimated value" style={{ flex: 0.43 }}>
               <Input
                 type="text"
                 required
-                onChange={(event) => setEstimatedValue(event.target.value)}
+                onChange={(event) => setEstimatedValue(parseNumberInputValue(event.target.value))}
                 value={estimatedValue}
                 width="100%"
                 placeholder="0.00 USD"
               />
             </Field>
           </Flex>
-          <StatusText isSuccess>
-            <StatusIcon><Icon name="CheckCircle" color="success" size={17} /></StatusIcon>
-            Confirmed
-          </StatusText>
+          {/*<StatusText isSuccess>*/}
+          {/*  <StatusIcon><Icon name="CheckCircle" color="success" size={17} /></StatusIcon>*/}
+          {/*  Confirmed*/}
+          {/*</StatusText>*/}
         </InputWrapper>
-        {!isEmpty(selectedNft) && (
+        {!isEmpty(selectedNft) && !isEmpty(estimatedValue) && (
           <>
             <Heading mt={2} px={30} py={20}>Receive</Heading>
             <InputWrapper mt={3}>
@@ -77,10 +80,10 @@ const FractionateForm = ({ nftAssets }) => {
                   <Input
                     type="text"
                     required
-                    onChange={(event) => setFractionValue(event.target.value)}
+                    onChange={(event) => setFractionValue(parseNumberInputValue(event.target.value, true))}
                     value={fractionValue}
                     width="100%"
-                    placeholder="1.000"
+                    placeholder="1000"
                   />
                 </Field>
                 <Text style={{ flex: 0.15 }} textAlign="center" mb={28} px={15} fontSize={16} color={'#d2d2d2'}>tokens of</Text>
@@ -94,16 +97,18 @@ const FractionateForm = ({ nftAssets }) => {
                   <Avatar src={selectedNft.image} size={45} backgroundColor={selectedNft.backgroundColor} ml={3} />
                 </Flex>
               </Flex>
-              <StatusText>
-                <StatusIcon><Icon name="Cancel" color="danger" size={17} /></StatusIcon>
-                Unconfirmed
-              </StatusText>
+              {/*<StatusText>*/}
+              {/*  <StatusIcon><Icon name="Cancel" color="danger" size={17} /></StatusIcon>*/}
+              {/*  Unconfirmed*/}
+              {/*</StatusText>*/}
             </InputWrapper>
           </>
         )}
       </FormWrapper>
       <FractionateButton
+        selectedNft={selectedNft}
         buttonProps={{
+          disabled: !!submitDisabled,
           mt: 40,
           width: 1/2,
         }}

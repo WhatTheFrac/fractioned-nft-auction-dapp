@@ -3,8 +3,8 @@ import { Flex, Loader, Text, Card, Button, Modal, Box, Heading, Link, Icon} from
 import { Eth } from '@rimble/icons';
 import PropTypes from 'prop-types';
 
+// components
 import FractionateModalInfoRow from './FractionateModalInfoRow';
-import FractionateProgressBar from './FractionateProgressBar';
 import FractionateSuccessDialog from './FractionateSuccessDialog';
 import FractionateFailureDialog from './FractionateFailureDialog';
 
@@ -56,6 +56,7 @@ const FractionateButton = ({
 
   const userFractionateConfirm = e => {
     e.preventDefault();
+    setTransactionInProgress(true);
     setShowMetamaskConfirm(true);
     // try to execute transaction, request permission with metamask
   };
@@ -93,20 +94,6 @@ const FractionateButton = ({
     setShowFailureDialog(false);
   };
 
-  const estimatedTransactionTimeSeconds = () => {
-    // TODO make an actual estimate with eth gas station
-    return 15;
-  };
-
-  const estimatedTimeForDisplay = () => {
-    let seconds = estimatedTransactionTimeSeconds();
-    if (seconds < 60) {
-      return seconds + " seconds";
-    }
-    // rounds up for number of minutes to be pessimistic
-    return Math.ceil(seconds / 60).toFixed(0) + " minutes"
-  }
-
   let metamaskConfirmIndicator = (
     <Flex
       p={3}
@@ -142,12 +129,6 @@ const FractionateButton = ({
       </Box>
     </Flex>
   );
-
-  let header = transactionInProgress
-    ? <FractionateProgressBar estimatedTimeInSeconds={estimatedTransactionTimeSeconds()} />
-    : <Box bg={"primary"} px={3} py={2}>
-        <Text color={"white"}>Summary of Fractionate</Text>
-      </Box>;
 
   return (
     <>
@@ -188,7 +169,11 @@ const FractionateButton = ({
                 overflow={"hidden"}
                 my={[3, 4]}
               >
-                {header}
+                {transactionInProgress && (
+                  <Box bg={"primary"} px={3} py={2}>
+                    <Text color={"white"}>Summary of Fractionate</Text>
+                  </Box>
+                )}
                 {showMetamaskConfirm ? metamaskConfirmIndicator : null}
                 <FractionateModalInfoRow
                   title="NFT to deposit"
@@ -197,29 +182,37 @@ const FractionateButton = ({
                   secondaryData="#121480970"
                 />
                 <FractionateModalInfoRow
-                  title="DAI to deposit"
-                  description="In order for people to purchase fractions of this NFT, this DAI will be sent to the balancer pool along with the NFT tokens."
-                  data="1,000 DAI"
-                  secondaryData="approximately $1,000"
+                  title="Number of NFT shares to receive"
+                  description="This is the number of shares that will be created for your NFT."
+                  data="The Black Argo"
+                  secondaryData="#121480970"
                 />
-                <FractionateModalInfoRow
-                  title="Transaction Fee"
-                  description="Pays the Ethereum network to process your transaction. Spent even if the transaction fails."
-                  data="0.02 Eth"
-                  secondaryData="$0.18"
-                />
-                <FractionateModalInfoRow
-                  title="Estimated Time"
-                  description="Commiting changes to the blockchain requires time for your transaction to be mined."
-                  data={estimatedTimeForDisplay()}
-                />
+                {/*<FractionateModalInfoRow*/}
+                {/*  title="DAI to deposit"*/}
+                {/*  description="In order for people to purchase fractions of this NFT, this DAI will be sent to the balancer pool along with the NFT tokens."*/}
+                {/*  data="1,000 DAI"*/}
+                {/*  secondaryData="approximately $1,000"*/}
+                {/*/>*/}
+                {/*<FractionateModalInfoRow*/}
+                {/*  title="Transaction Fee"*/}
+                {/*  description="Pays the Ethereum network to process your transaction. Spent even if the transaction fails."*/}
+                {/*  data="0.02 Eth"*/}
+                {/*  secondaryData="$0.18"*/}
+                {/*/>*/}
+                {/*<FractionateModalInfoRow*/}
+                {/*  title="Estimated Time"*/}
+                {/*  description="Commiting changes to the blockchain requires time for your transaction to be mined."*/}
+                {/*  data={estimatedTimeForDisplay()}*/}
+                {/*/>*/}
               </Flex>
               <Flex justifyContent="flex-end">
                 <Button.Outline onClick={closeModal} mr={1}>Cancel</Button.Outline>
-                {!transactionInProgress
-                  ? <Button onClick={userFractionateConfirm}>Fractionate!</Button>
-                  : <Button disabled>Fractionate!</Button>
-                }
+                <Button
+                  onClick={userFractionateConfirm}
+                  disabled={!!transactionInProgress}
+                >
+                  Fractionate
+                </Button>
               </Flex>
             </Flex>
           </Box>
@@ -233,6 +226,10 @@ const FractionateButton = ({
 
 FractionateButton.propTypes = {
   buttonProps: PropTypes.object,
+  data: PropTypes.shape({
+    selectedNftId: PropTypes.string,
+    fractionValue: PropTypes.number,
+  }),
 };
 
 export default FractionateButton;
