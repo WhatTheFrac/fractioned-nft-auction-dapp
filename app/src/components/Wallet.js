@@ -50,7 +50,7 @@ const Wallet = (props) => {
     REACT_APP_ACCEPTED_TOKEN_ADDRESS_MAINNET: addressMainnet,
     REACT_APP_ACCEPTED_TOKEN_ADDRESS_RINKEBY: addressRinkeby,
   } = process.env;
-  const address = connectedWallet.networkId === 0 ? addressMainnet : addressRinkeby;
+  const address = connectedWallet.networkId === 1 ? addressMainnet : addressRinkeby;
 
   return (
     <>

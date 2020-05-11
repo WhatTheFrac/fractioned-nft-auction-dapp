@@ -35,7 +35,7 @@ export const getNftAssetsByOwnerAddress = (ownerAddress, attempt) => {
     limit: 200,
   };
   const networkId = Number(window.web3.givenProvider.networkVersion);
-  const apiPrefix = networkId === 0 ? '' : 'rinkeby-';
+  const apiPrefix = networkId === 1 ? '' : 'rinkeby-';
   const url = `https://${apiPrefix}api.opensea.io/api/v1/assets/?${qs.stringify(query)}`;
   return axios.get(url, {
     timeout: 5000,
