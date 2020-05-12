@@ -149,8 +149,7 @@ const FractionateButton = ({
     </Flex>
   );
 
-  const { tokenId, tokenAddress, title: nftTitle } = selectedNft;
-  const nftFormattedTitle = `${nftTitle} #${tokenId}`
+  const { tokenAddress, title: nftTitle } = selectedNft;
 
   return (
     <>
@@ -241,14 +240,14 @@ const FractionateButton = ({
                 <FractionateModalInfoRow
                   title="NFT to deposit"
                   description="This is the NFT for which this protocol will create fractional shares."
-                  data={nftFormattedTitle}
+                  data={nftTitle}
                   secondaryData={tokenAddress}
                 />
                 <FractionateModalInfoRow
                   title="Number of NFT shares to receive"
                   description="This is the number of shares that will be created for your NFT."
                   data={`${nftTokenAmount} shares`}
-                  secondaryData={`of ${nftFormattedTitle}`}
+                  secondaryData={`of ${nftTitle}`}
                 />
                 {/*<FractionateModalInfoRow*/}
                 {/*  title="DAI to deposit"*/}
