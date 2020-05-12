@@ -14,7 +14,7 @@ import { parseNumberInputValue } from '../utils';
 
 
 const FormWrapper = styled.div`
-  background: #eee;
+  background: #ebe9f9;
   border-radius: 10px;
   width: 98%;
 `;
@@ -34,6 +34,7 @@ const StatusIcon = styled.span`
   top: 4px;
   padding-right: 4px;
 `;
+
 const StatusText = styled(Text)`
   color: ${({ isSuccess }) => isSuccess ? '#605e69' : '#c2c2c2'};
   font-size: 15px;
@@ -41,14 +42,17 @@ const StatusText = styled(Text)`
 
 const FractionateForm = ({ nftAssets }) => {
   const [estimatedValue, setEstimatedValue] = useState('');
-  const [fractionValue, setFractionValue] = useState('');
+  const [fractionCountValue, setfractionCountValue] = useState(1000);
+  const [balancerCountValue, setBalancerCountValue] = useState(500);
   const [selectedNftId, setSelectedNftId] = useState('');
   const selectedNft = nftAssets.find(({ uid }) => uid === selectedNftId);
   const submitDisabled = isEmpty(selectedNft) || isEmpty(estimatedValue);
+  const heading = (title) => <Heading as={"h3"} px={30} py={20}>{title}</Heading>;
+
   return (
     <Flex flexDirection="column" justifyContent="center" alignItems="center">
       <FormWrapper>
-        <Heading px={30} py={20}>Deposit</Heading>
+        {heading("Deposit")}
         <InputWrapper mt={3}>
           <Flex flexWrap="wrap" width="100%">
             <Field label="NFT" style={{ flex: 0.52 }}>
@@ -73,17 +77,16 @@ const FractionateForm = ({ nftAssets }) => {
         </InputWrapper>
         {!isEmpty(selectedNft) && !isEmpty(estimatedValue) && (
           <>
-            <Heading mt={2} px={30} py={20}>Receive</Heading>
+            {heading("Mint")}
             <InputWrapper mt={3}>
               <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
-                <Field label="NFT tokens" style={{ flex: 0.3 }}>
+                <Field label="How many NFT tokens would you like to create?" style={{ flex: 0.3 }}>
                   <Input
                     type="text"
                     required
-                    onChange={(event) => setFractionValue(parseNumberInputValue(event.target.value, true))}
-                    value={fractionValue}
+                    onChange={(event) => setfractionCountValue(parseNumberInputValue(event.target.value, true))}
+                    value={fractionCountValue}
                     width="100%"
-                    placeholder="1000"
                   />
                 </Field>
                 <Text style={{ flex: 0.15 }} textAlign="center" mb={28} px={15} fontSize={16} color={'#d2d2d2'}>tokens of</Text>
@@ -102,8 +105,57 @@ const FractionateForm = ({ nftAssets }) => {
               {/*  Unconfirmed*/}
               {/*</StatusText>*/}
             </InputWrapper>
+            {heading("Sell")}
+            <InputWrapper mt={3}>
+              <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
+                <Field label="How many of these tokens would you like to sell?" style={{ flex: 0.3 }}>
+                  <Input
+                    type="text"
+                    required
+                    onChange={(event) => setfractionCountValue(parseNumberInputValue(event.target.value, true))}
+                    value={balancerCountValue}
+                    width="100%"
+                  />
+                </Field>
+                <Text style={{ flex: 0.15 }} textAlign="center" mb={28} px={15} fontSize={16} color={'#d2d2d2'}>tokens of</Text>
+                <Flex style={{ flex: 0.6 }} height={80} alignItems="center" justifyConten="center">
+                  <Input
+                    type="text"
+                    value={selectedNft.title}
+                    disabled
+                    style={{ flex: 1 }}
+                  />
+                  <Avatar src={selectedNft.image} size={45} backgroundColor={selectedNft.backgroundColor} ml={3} />
+                </Flex>
+              </Flex>
+            </InputWrapper>
+            {heading("Sell")}
+            <InputWrapper mt={3}>
+              <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
+                <Field label="How many of these tokens would you like to sell?" style={{ flex: 0.3 }}>
+                  <Input
+                    type="text"
+                    required
+                    onChange={(event) => setfractionCountValue(parseNumberInputValue(event.target.value, true))}
+                    value={balancerCountValue}
+                    width="100%"
+                  />
+                </Field>
+                <Text style={{ flex: 0.15 }} textAlign="center" mb={28} px={15} fontSize={16} color={'#d2d2d2'}>tokens of</Text>
+                <Flex style={{ flex: 0.6 }} height={80} alignItems="center" justifyConten="center">
+                  <Input
+                    type="text"
+                    value={selectedNft.title}
+                    disabled
+                    style={{ flex: 1 }}
+                  />
+                  <Avatar src={selectedNft.image} size={45} backgroundColor={selectedNft.backgroundColor} ml={3} />
+                </Flex>
+              </Flex>
+            </InputWrapper>
           </>
         )}
+        {!isEmpty(fractionCountValue) && <Text>DERP</Text>}
       </FormWrapper>
       <FractionateButton
         selectedNft={selectedNft}
