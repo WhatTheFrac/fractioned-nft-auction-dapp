@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Flex, Loader, Text, Avatar, Card } from 'rimble-ui';
+import { Flex, Loader, Text, Avatar } from 'rimble-ui';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 

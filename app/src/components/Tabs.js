@@ -49,7 +49,7 @@ const Tabs = ({ tabData }) => {
   const tabs = tabData.map((tabData, index) => {
     const isActive = index === tabIndexSelected;
     return (
-      <TabButton isActive={isActive} onClick={() => !isActive && setTabIndexSelected(index)}>
+      <TabButton isActive={isActive} key={index} onClick={() => !isActive && setTabIndexSelected(index)}>
         {tabData.title}
       </TabButton>
     )
