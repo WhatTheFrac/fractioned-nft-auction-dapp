@@ -239,7 +239,7 @@ const FractionateForm = ({ nftAssets }) => {
       </FormWrapper>
       <FractionateButton
         selectedNft={selectedNft}
-        nftTokenAmount={Number(fractionValue) || 1000}
+        nftTokenAmount={Number(fractionCountValue) || 1000}
         buttonProps={{
           disabled: !!submitDisabled,
           mt: 40,
