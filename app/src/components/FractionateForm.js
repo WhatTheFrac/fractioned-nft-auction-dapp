@@ -80,7 +80,7 @@ const FractionateForm = ({ nftAssets }) => {
   const [minBidIncrease, setMinBidIncrease] = useState('');
   const [auctionDurationSeconds, setAuctionDurationSeconds] = useState('');
 
-  const selectedNft = nftAssets.find(({ uid }) => uid === selectedNftId);
+  const selectedNft = nftAssets.find(({ uid }) => uid === selectedNftId) || {};
   const submitDisabled = isEmpty(selectedNft) || isEmpty(estimatedValue);
 
   const heading = (title) => <Heading as={"h3"} px={30} pt={40} pb={20}>{title}</Heading>;
