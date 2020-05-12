@@ -13,6 +13,9 @@ import {
 // services
 import { getNftAssetsByOwnerAddress } from '../services/opensea'
 
+// actions
+import { checkPendingTransactionsAction } from './transactionActions';
+
 
 export const fetchWalletNftAssetsAction = () => async (dispatch, getState) => {
   const { wallet: { connected: connectedWallet } } = getState();
@@ -47,6 +50,7 @@ export const connectWalletAction = () => async (dispatch) => {
 
   dispatch({ type: SET_CONNECTED_WALLET, payload: wallet });
   dispatch(fetchWalletNftAssetsAction());
+  dispatch(checkPendingTransactionsAction());
 };
 
 export const getConnectedWalletAction = () => async (dispatch) => {
@@ -62,4 +66,5 @@ export const getConnectedWalletAction = () => async (dispatch) => {
   const wallet = { address, networkId: Number(networkId) };
   dispatch({ type: SET_CONNECTED_WALLET, payload: wallet });
   dispatch(fetchWalletNftAssetsAction());
+  dispatch(checkPendingTransactionsAction());
 };
