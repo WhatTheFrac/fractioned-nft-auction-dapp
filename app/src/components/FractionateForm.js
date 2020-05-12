@@ -4,6 +4,9 @@ import { Field, Input, Select, Card, Flex, Heading, Text, Avatar } from 'rimble-
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import Dropdown from 'react-dropdown';
+import 'react-dropdown/style.css';
+
 
 // components
 import NftAssetsSelect from './NftAssetsSelect';
@@ -63,14 +66,19 @@ const GroupedButton = styled.div`
   }
 `
 
+const StyledDropdown = styled(Dropdown)`
+  border-radius: 12px;
+  width: 100%;
+`
+
 const FractionateForm = ({ nftAssets }) => {
   const [estimatedValue, setEstimatedValue] = useState('');
   const [fractionCountValue, setFractionCountValue] = useState(1000);
   const [balancerCountValue, setBalancerCountValue] = useState('');
   const [selectedNftId, setSelectedNftId] = useState('');
-  const [auctionDurationSeconds, setAuctionDurationSeconds] = useState('');
   const [minBid, setMinBid] = useState('');
   const [minBidIncrease, setMinBidIncrease] = useState('');
+  const [auctionDurationSeconds, setAuctionDurationSeconds] = useState('');
 
   const selectedNft = nftAssets.find(({ uid }) => uid === selectedNftId);
   const submitDisabled = isEmpty(selectedNft) || isEmpty(estimatedValue);
@@ -102,6 +110,14 @@ const FractionateForm = ({ nftAssets }) => {
     </GroupedButton>
   );
 
+  const minBidIncreaseOptions = [1,3,5,10].map(x => {return {value: x, label: x+"%"};});
+  const auctionDurationOptions = [
+    { value: 86400, label: "1 day" },
+    { value: 259200, label: "3 days" },
+    { value: 604800, label: "1 week" },
+    { value: 2592000, label: "1 month" }
+  ];
+
   return (
     <Flex flexDirection="column" justifyContent="center" alignItems="center" pb={80}>
       <FormWrapper>
@@ -112,7 +128,7 @@ const FractionateForm = ({ nftAssets }) => {
               <NftAssetsSelect borderless required onChange={setSelectedNftId} />
             </Field>
             <Text style={{ flex: 0.05 }} textAlign="center" mt={40} px={15} fontSize={24} color={'#d2d2d2'}>=</Text>
-            <Field label="Estimated value" style={{ flex: 0.43 }}>
+            <Field label="Estimated value USD" style={{ flex: 0.43 }}>
               <Input
                 type="text"
                 required
@@ -186,7 +202,7 @@ const FractionateForm = ({ nftAssets }) => {
             {heading("Provide Auction Details")}
               <InputWrapper mt={3}>
                 <Flex flexWrap="wrap" width="100%">
-                  <Field label="Minimum Bid" pr={16} style={{ flex: 0.33 }}>
+                  <Field label="Minimum bid USD" pr={16} style={{ flex: 0.33 }}>
                     <Input
                       type="text"
                       required
@@ -196,14 +212,20 @@ const FractionateForm = ({ nftAssets }) => {
                       placeholder="0.00 USD"
                     />
                   </Field>
-                  <Field label="Minimum Bid" pr={16} style={{ flex: 0.33 }}>
-                    <Input
-                      type="text"
+                  <Field label="Minimum bid increase" height={80} pr={16} style={{ flex: 0.33 }}>
+                    <StyledDropdown
                       required
-                      onChange={(event) => setMinBid(parseNumberInputValue(event.target.value))}
-                      value={minBid}
-                      width="100%"
-                      placeholder="0.00 USD"
+                      options={minBidIncreaseOptions}
+                      onChange={setMinBidIncrease}
+                      value={minBidIncrease}
+                    />
+                  </Field>
+                  <Field label="Auction duration" height={80} style={{ flex: 0.34 }}>
+                    <StyledDropdown
+                      required
+                      options={auctionDurationOptions}
+                      onChange={setAuctionDurationSeconds}
+                      value={auctionDurationSeconds}
                     />
                   </Field>
                 </Flex>
@@ -226,47 +248,6 @@ const FractionateForm = ({ nftAssets }) => {
     </Flex>
   );
 };
-/*
-let derp=
-(<>
-                  <Field label="Auction Duration" pr={16} style={{ flex: 0.34 }}>
-                    <Select>
-                      <option value="usd">US dollar</option>
-                      <option value="gbp">Great Britain pound</option>
-                      <option value="btc">Bitcoin</option>
-                      <option value="eth">Ethereum</option>
-                      <option value="ltc">Litecoin</option>
-                    </Select>
-                  </Field>
-                  <Field label="Auction Duration" pr={16} style={{ flex: 0.33 }}>
-                    <Select
-                      required={true}
-                      value={auctionDurationSeconds}
-                      onChange={(event) => setAuctionDurationSeconds(parseNumberInputValue(event.target.value))}
-                      options={[
-                        { value: 86400, label: "1 day" },
-                        { value: 259200, label: "3 Days" },
-                        { value: 604800, label: "1 week" },
-                        { value: 2592000, label: "1 month" }
-                      ]}
-                    />
-                  </Field>
-                  <Field label="Auction Duration" pr={16} style={{ flex: 0.34 }}>
-                    <Select
-                      required={true}
-                      value={minBidIncrease}
-                      onChange={(event) => setMinBidIncrease(parseNumberInputValue(event.target.value))}
-                      options={[
-                        { value: 1, label: "1%" },
-                        { value: 3, label: "3%" },
-                        { value: 5, label: "5%" },
-                        { value: 10, label: "10%" }
-                      ]}
-                    />
-                  </Field>
-</>);
-*/
-
 
 FractionateForm.propTypes = {
   nftAssets: PropTypes.array,
