@@ -1,6 +1,7 @@
 import Web3 from 'web3';
 import isEmpty from 'lodash/isEmpty';
 import toLower from 'lodash/toLower';
+import { utils as ethersUtils } from 'ethers';
 
 // assets
 import erc20Abi from '../assets/abi/erc20.json';
@@ -73,3 +74,16 @@ export const isCaseInsensitiveEqual = (a, b) => {
   if (a === b) return true;
   return toLower(a) === toLower(b);
 };
+
+export const getDaiAddress = (networkId) => {
+  if (networkId === 1) return process.env.REACT_APP_ACCEPTED_TOKEN_ADDRESS_MAINNET;
+  return process.env.REACT_APP_ACCEPTED_TOKEN_ADDRESS_RINKEBY;
+};
+
+export const formatTokenAmount = (value, decimals = 18) => ethersUtils.parseUnits(value.toString(), decimals);
+
+export const parseTokenAmount = (value, decimals = 18) => Number(ethersUtils.formatUnits(value.toString(), decimals));
+
+export const getEtherscanHostname = (networkId) => ` https://${networkId === 1 ? '' : 'rinkeby.'}etherscan.io`;
+
+export const getTransactionDetailsLink = (hash, networkId) => `${getEtherscanHostname(networkId)}/tx/${hash}`;

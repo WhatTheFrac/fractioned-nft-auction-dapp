@@ -12,7 +12,7 @@ import TokenBalance from './TokenBalance';
 import { connectWalletAction } from '../actions/walletActions';
 
 // utils
-import { getNetworkNameById, truncateHexString } from '../utils';
+import { getDaiAddress, getNetworkNameById, truncateHexString } from '../utils';
 
 
 const BoxWrapper = styled(Box)`
@@ -47,10 +47,8 @@ const Wallet = (props) => {
   const {
     REACT_APP_ACCEPTED_TOKEN_SYMBOL: symbol,
     REACT_APP_ACCEPTED_TOKEN_DECIMALS: decimals,
-    REACT_APP_ACCEPTED_TOKEN_ADDRESS_MAINNET: addressMainnet,
-    REACT_APP_ACCEPTED_TOKEN_ADDRESS_RINKEBY: addressRinkeby,
   } = process.env;
-  const address = connectedWallet.networkId === 1 ? addressMainnet : addressRinkeby;
+  const address = getDaiAddress(connectedWallet.networkId);
 
   return (
     <>

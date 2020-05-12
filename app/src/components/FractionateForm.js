@@ -43,7 +43,7 @@ const FractionateForm = ({ nftAssets }) => {
   const [estimatedValue, setEstimatedValue] = useState('');
   const [fractionValue, setFractionValue] = useState('');
   const [selectedNftId, setSelectedNftId] = useState('');
-  const selectedNft = nftAssets.find(({ uid }) => uid === selectedNftId);
+  const selectedNft = nftAssets.find(({ uid }) => uid === selectedNftId) || {};
   const submitDisabled = isEmpty(selectedNft) || isEmpty(estimatedValue);
   return (
     <Flex flexDirection="column" justifyContent="center" alignItems="center">
@@ -107,6 +107,7 @@ const FractionateForm = ({ nftAssets }) => {
       </FormWrapper>
       <FractionateButton
         selectedNft={selectedNft}
+        nftTokenAmount={Number(fractionValue) || 1000}
         buttonProps={{
           disabled: !!submitDisabled,
           mt: 40,
