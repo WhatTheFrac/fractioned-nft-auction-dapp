@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Flash, Button, Flex, Card, Box, Text, Loader } from 'rimble-ui';
+import { Flash, Button, Flex, Box, Text, Loader } from 'rimble-ui';
 import isEmpty from 'lodash/isEmpty';
 import styled from 'styled-components';
 
