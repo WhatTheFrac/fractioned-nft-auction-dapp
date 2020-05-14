@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Flex, Loader, Text, Card, Button, Modal, Box, Heading, Link, Icon, Tooltip } from 'rimble-ui';
+import { Flex, Loader, Text, Card, Button, Modal, Box, Heading, Link, Icon } from 'rimble-ui';
 import { Eth } from '@rimble/icons';
 import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';

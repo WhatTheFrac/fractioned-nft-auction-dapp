@@ -9,6 +9,7 @@ import isEmpty from 'lodash/isEmpty';
 // components
 import Wallet from '../components/Wallet';
 import FractionateForm from '../components/FractionateForm';
+import AuctionDisplay from '../components/AuctionDisplay';
 import Tabs from '../components/Tabs';
 
 // utils
@@ -81,7 +82,11 @@ const App = (props) => {
     {
       title: "Sell",
       content: <Text textAlign="center">(╯°□°)╯︵ [AUCTION]</Text>,
-    }
+    },
+    {
+      title: "Auction",
+      content: <AuctionDisplay />,
+    },
   ];
 
   return (
