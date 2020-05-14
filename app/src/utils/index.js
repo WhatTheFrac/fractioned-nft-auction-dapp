@@ -87,3 +87,14 @@ export const parseTokenAmount = (value, decimals = 18) => Number(ethersUtils.for
 export const getEtherscanHostname = (networkId) => ` https://${networkId === 1 ? '' : 'rinkeby.'}etherscan.io`;
 
 export const getTransactionDetailsLink = (hash, networkId) => `${getEtherscanHostname(networkId)}/tx/${hash}`;
+
+export const AuctionState = {
+  // auction running states
+  NO_BIDS: 'no_bids',
+  HIGHEST_BIDDER: 'highest_bidder',
+  EXISTING_BIDS: 'existing_bids',
+  // auction complete states
+  WON_NFT: 'won_nft',
+  WON_PAYOUT: 'won_payout',
+  AUCTION_OVER: 'auction_over',
+};

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Field, Input, Select, Card, Flex, Heading, Text, Avatar } from 'rimble-ui';
+import { Field, Input, Card, Flex, Heading, Text, Avatar } from 'rimble-ui';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
