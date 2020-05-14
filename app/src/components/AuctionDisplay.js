@@ -32,7 +32,7 @@ const AuctionDisplay = ({ nftAssets }) => {
   const handleClaimWinnings = () => alert("claim winnings button clicked");
   const getCurrentBid = () => "359.43";
   const getMinimumBid = () => "382.89";
-  const getAuctionEndTimestampMS = () => 1589426343795;
+  const getAuctionEndTimestampMS = () => 1590080286692;
   const getNFTName = () => "Planet 239479";
 
   // TODO returns true if the auction is not complete AND the following is true for the user
@@ -69,7 +69,7 @@ const AuctionDisplay = ({ nftAssets }) => {
       setAuctionState(getAuctionState());
       setAuctionIsComplete(isAuctionComplete());
       setTimeRemaining(getTimeRemaining());
-    }, 500);
+    }, 1000);
   });
 
   return (
