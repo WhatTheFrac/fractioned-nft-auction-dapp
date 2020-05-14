@@ -33,6 +33,8 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^3.0.0"
+    "@openzeppelin/contracts": "^3.0.0",
+    "@pie-dao/mock-contracts": "^0.0.8",
+    "@pie-dao/smart-pools": "^0.0.1"
   }
 }
