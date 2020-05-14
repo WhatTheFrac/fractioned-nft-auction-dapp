@@ -29,7 +29,7 @@ contract Fracker {
     struct FrackedToken {
         IERC721 nftContract;
         uint256 nftId;
-        // address nftReceiver;
+        address nftReceiver;
         address fracker; //address that fracked the token
         uint256 frackTime; // timestamp when token was fracked
         IERC20 token;
@@ -37,9 +37,12 @@ contract Fracker {
         IBPool balancerPool;
         uint256 balancerFlipDuration;
         IERC20 auctionToken;
-        uint256 minAuctionBid;
+        // uint256 minAuctionBid;
         uint256 minBidIncrease;
         uint256 auctionDuration;
+        address lastBidder;
+        uint256 lastBid;
+        // bool settled;
     }
 
     FrackedToken[] public frackedTokens;
@@ -63,15 +66,9 @@ contract Fracker {
         uint256 _targetPrice, // estimated value of nft
         uint256 _balancerFlipDuration, // How long it takes to flip the weight
         uint256 _auctionToken,
-        uint256 _minAuctionBid,
+        // uint256 _minAuctionBid,
         uint256 _minBidIncrease,
-        uint256 _auctionDuration,
-
-        // Auction data
-        address lastBidder,
-        address lastBid,
-
-        bool settled
+        uint256 _auctionDuration
     ) public {
         require(_amountToPool <= _initialSupply, "Cannot pool more than initialSupply");
         require(_initialSupply != 0, "_initialSupply cannot be zero");
@@ -105,7 +102,7 @@ contract Fracker {
         frackedTokenData.balancerFlipDuration = _balancerFlipDuration;
         frackedTokenData.fracker = msg.sender;
         frackedTokenData.auctionToken = IERC20(_auctionToken);
-        frackedTokenData.minAuctionBid = _minAuctionBid;
+        // frackedTokenData.minAuctionBid = _minAuctionBid;
         frackedTokenData.minBidIncrease = _minBidIncrease;
         frackedTokenData.auctionDuration = _auctionDuration;
 
@@ -157,7 +154,7 @@ contract Fracker {
 
     // TODO catch revert on failure to send
     // Remove liquidity from balancer pool, claim proceeds and send tokens back to user, and send nft to buyer
-    function settle(uint256 _frackID) external {
+    function settle(uint256 _frackID) public {
         FrackedToken storage frackedTokenData = frackedTokens[_frackID];
         require(block.timestamp > frackedTokenData.frackTime + frackedTokenData.auctionDuration, "Auction not passed");
 
@@ -193,7 +190,7 @@ contract Fracker {
     function bid(uint256 _frackID, uint256 _amount) external {
         FrackedToken storage frackedTokenData = frackedTokens[_frackID];
         require(block.timestamp < frackedTokenData.frackTime + frackedTokenData.auctionDuration, "Auction has passed");
-        require(_amount > frackedTokenData.minAuctionBid, "Bid too low");
+        // require(_amount > frackedTokenData.minAuctionBid, "Bid too low");
         require(_amount > frackedTokenData.lastBid + frackedTokenData.minBidIncrease, "Bid increase too low");
 
         if(frackedTokenData.lastBidder != address(0)) {
