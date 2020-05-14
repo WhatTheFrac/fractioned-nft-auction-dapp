@@ -1,5 +1,7 @@
 import Web3 from 'web3';
 import isEmpty from 'lodash/isEmpty';
+import toLower from 'lodash/toLower';
+import { utils as ethersUtils } from 'ethers';
 
 // assets
 import erc20Abi from '../assets/abi/erc20.json';
@@ -52,3 +54,47 @@ export const getTokenBalance = (
 ) => getERC20Contract(tokenAddress).methods.balanceOf(walletAddress).call()
     .then((balanceInWei) => Number(tokenDecimals > 0 ? Number(balanceInWei) / (10 ** tokenDecimals) : balanceInWei))
     .catch(() => 0);
+
+export const parseNumberInputValue = (rawValue, noDecimals) => {
+  let value = rawValue
+    .replace(/[^0-9.,]+/g, '')
+    .replace(/[,]+/g, '.');
+  if (noDecimals) {
+    value = value.replace(/[.]+/g, '');
+  } else if (value.indexOf('.') !== value.lastIndexOf('.')) {
+    const [first, ...rest] = value.split('.');
+    value = `${first}.${rest.join('')}`;
+  }
+  if (!value) value = '';
+  return value;
+};
+
+export const isCaseInsensitiveEqual = (a, b) => {
+  if (!a || !b) return false;
+  if (a === b) return true;
+  return toLower(a) === toLower(b);
+};
+
+export const getDaiAddress = (networkId) => {
+  if (networkId === 1) return process.env.REACT_APP_ACCEPTED_TOKEN_ADDRESS_MAINNET;
+  return process.env.REACT_APP_ACCEPTED_TOKEN_ADDRESS_RINKEBY;
+};
+
+export const formatTokenAmount = (value, decimals = 18) => ethersUtils.parseUnits(value.toString(), decimals);
+
+export const parseTokenAmount = (value, decimals = 18) => Number(ethersUtils.formatUnits(value.toString(), decimals));
+
+export const getEtherscanHostname = (networkId) => ` https://${networkId === 1 ? '' : 'rinkeby.'}etherscan.io`;
+
+export const getTransactionDetailsLink = (hash, networkId) => `${getEtherscanHostname(networkId)}/tx/${hash}`;
+
+export const AuctionState = {
+  // auction running states
+  NO_BIDS: 'no_bids',
+  HIGHEST_BIDDER: 'highest_bidder',
+  EXISTING_BIDS: 'existing_bids',
+  // auction complete states
+  WON_NFT: 'won_nft',
+  WON_PAYOUT: 'won_payout',
+  AUCTION_OVER: 'auction_over',
+};

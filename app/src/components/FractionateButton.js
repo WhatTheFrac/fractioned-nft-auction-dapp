@@ -1,22 +1,45 @@
-import React, { useState } from 'react';
-import { Flex, Loader, Text, Card, Button, Modal, Box, Heading, Link, Icon} from 'rimble-ui';
+import React, { useState, useEffect } from 'react';
+import { Flex, Loader, Text, Card, Button, Modal, Box, Heading, Link, Icon } from 'rimble-ui';
 import { Eth } from '@rimble/icons';
 import PropTypes from 'prop-types';
+import isEmpty from 'lodash/isEmpty';
+import { connect } from 'react-redux';
 
+// actions
+import { approveTokenTransactionAction } from '../actions/transactionActions';
+
+// constants
+import {
+  STATUS_CONFIRMED,
+  STATUS_PENDING,
+  TRANSACTION_TYPE,
+} from '../constants/transactionConstants';
+
+// components
 import FractionateModalInfoRow from './FractionateModalInfoRow';
-import FractionateProgressBar from './FractionateProgressBar';
 import FractionateSuccessDialog from './FractionateSuccessDialog';
 import FractionateFailureDialog from './FractionateFailureDialog';
+
+// utils
+import {
+  getTransactionDetailsLink,
+  isCaseInsensitiveEqual,
+} from '../utils';
 
 
 const FractionateButton = ({
   buttonProps,
+  approveTokenTransaction,
+  connectedWalletAddress,
+  transactions,
+  waitingForTransactionSubmit,
+  networkId,
+  selectedNft,
+  nftTokenAmount,
 }) => {
   // TODO const { } = props;
 
   const resetState = () => {
-    setShowMetamaskConfirm(false);
-    setTransactionInProgress(false);
   }
 
   const closeModal = e => {
@@ -37,42 +60,40 @@ const FractionateButton = ({
     1. dialog opened
     2. user clicks fractionate
       -> userFractionateConfirm()
-        -> showMetamaskConfirm(true)
     3. user confirms with metamask
-      -> metamaskConfirm()
-        -> showMetamaskConfirm(false) showProgressBar(true)
       -> transactionSuccess()
-        -> success dialog shows [this modal replaced by success modal]
+      -> success dialog shows [this modal replaced by success modal]
     4. user closes dialog
 
     TODO handle failure
   */
   const [isOpen, setIsOpen] = useState(false);
-  const [showMetamaskConfirm, setShowMetamaskConfirm] = useState(false);
-  const [transactionInProgress, setTransactionInProgress] = useState(false);
 
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showFailureDialog, setShowFailureDialog] = useState(false);
 
-  const userFractionateConfirm = e => {
-    e.preventDefault();
-    setShowMetamaskConfirm(true);
-    // try to execute transaction, request permission with metamask
-  };
 
-  // TODO call this hook when the user actually does confirm with metamask instead of onclick below
-  const metamaskConfirm = e => {
-    e.preventDefault();
-    setShowMetamaskConfirm(false);
-    setTransactionInProgress(true);
+  // TODO: change to fractionalize transaction type
+  const fractionateTransaction = transactions.find(
+    ({ type, from }) => type === TRANSACTION_TYPE.TOKEN_APPROVE
+      && isCaseInsensitiveEqual(from, connectedWalletAddress)
+  ) || {};
+  const transactionInProgress = fractionateTransaction.status === STATUS_PENDING;
 
-    // TODO take actual fractionate action
+  useEffect(() => {
+    if (fractionateTransaction.status === STATUS_CONFIRMED) setShowSuccessDialog(true);
+  }, [transactions])
+
+
+  const userFractionateConfirm = (e) => {
+    e.preventDefault();
+    // TODO: change to fractionalize transaction action with its param
+    approveTokenTransaction();
   };
 
   // TODO call this when the transaction actually succeeds
-  const openSuccessDialog = e => {
+  const openSuccessDialog = (e) => {
     e.preventDefault();
-    resetState();
     setShowSuccessDialog(true);
     closeModal(e);
   };
@@ -93,20 +114,6 @@ const FractionateButton = ({
     setShowFailureDialog(false);
   };
 
-  const estimatedTransactionTimeSeconds = () => {
-    // TODO make an actual estimate with eth gas station
-    return 15;
-  };
-
-  const estimatedTimeForDisplay = () => {
-    let seconds = estimatedTransactionTimeSeconds();
-    if (seconds < 60) {
-      return seconds + " seconds";
-    }
-    // rounds up for number of minutes to be pessimistic
-    return Math.ceil(seconds / 60).toFixed(0) + " minutes"
-  }
-
   let metamaskConfirmIndicator = (
     <Flex
       p={3}
@@ -114,7 +121,6 @@ const FractionateButton = ({
       borderColor={"moon-gray"}
       alignItems={"center"}
       flexDirection={["column", "row"]}
-      onClick={metamaskConfirm}
     >
       <Box
         position={"relative"}
@@ -143,11 +149,7 @@ const FractionateButton = ({
     </Flex>
   );
 
-  let header = transactionInProgress
-    ? <FractionateProgressBar estimatedTimeInSeconds={estimatedTransactionTimeSeconds()} />
-    : <Box bg={"primary"} px={3} py={2}>
-        <Text color={"white"}>Summary of Fractionate</Text>
-      </Box>;
+  const { tokenAddress, title: nftTitle } = selectedNft;
 
   return (
     <>
@@ -166,7 +168,7 @@ const FractionateButton = ({
             </Flex>
             <Flex onClick={openFailureDialog}>
               <Heading textAlign="center" as="h1" fontSize={[2, 3]} px={[3, 0]}>
-                Confirm your Transaction
+                Fractionate Transaction
               </Heading>
             </Flex>
             <Link onClick={closeModal}>
@@ -175,9 +177,11 @@ const FractionateButton = ({
           </Flex>
           <Box p={[3, 4]}>
             <Flex justifyContent={"space-between"} flexDirection={"column"}>
-              <Text textAlign="center">
-                Please look over the details of your Fractionalization – this can't be undone!
-              </Text>
+              {isEmpty(fractionateTransaction) && (
+                <Text textAlign="center">
+                  Please look over the details of your Fractionalization – this can't be undone!
+                </Text>
+              )}
               <Flex
                 alignItems={"stretch"}
                 flexDirection={"column"}
@@ -188,38 +192,91 @@ const FractionateButton = ({
                 overflow={"hidden"}
                 my={[3, 4]}
               >
-                {header}
-                {showMetamaskConfirm ? metamaskConfirmIndicator : null}
+                {waitingForTransactionSubmit && metamaskConfirmIndicator}
+                {!isEmpty(fractionateTransaction) && (
+                  <Flex
+                    bg="primary"
+                    p={3}
+                    borderBottom={"1px solid gray"}
+                    borderColor={"moon-gray"}
+                    alignItems={"center"}
+                    justifyContent={"space-between"}
+                    flexDirection={["column", "row"]}
+                  >
+                    <Box>
+                      <Text
+                        textAlign={["center", "left"]}
+                        color="near-white"
+                        my={[1, 0]}
+                        fontSize={3}
+                        lineHeight={"1.25em"}
+                      >
+                        {fractionateTransaction.status === STATUS_PENDING ? 'Waiting for confirmation...' : 'Transaction confirmed'}
+                      </Text>
+                    </Box>
+
+                    <Box>
+                      <Flex flexDirection="row" alignItems="center">
+                        <Link
+                          color="near-white"
+                          ml={[0, 3]}
+                          fontSize={1}
+                          lineHeight={"1.25em"}
+                          target="_blank"
+                          href={getTransactionDetailsLink(fractionateTransaction.hash, networkId)}
+                        >
+                          Transaction details
+                          <Icon
+                            ml={1}
+                            color="near-white"
+                            name="Launch"
+                            size="14px"
+                          />
+                        </Link>
+                      </Flex>
+                    </Box>
+                  </Flex>
+                )}
                 <FractionateModalInfoRow
                   title="NFT to deposit"
                   description="This is the NFT for which this protocol will create fractional shares."
-                  data="The Black Argo"
-                  secondaryData="#121480970"
+                  data={nftTitle}
+                  secondaryData={tokenAddress}
                 />
                 <FractionateModalInfoRow
-                  title="DAI to deposit"
-                  description="In order for people to purchase fractions of this NFT, this DAI will be sent to the balancer pool along with the NFT tokens."
-                  data="1,000 DAI"
-                  secondaryData="approximately $1,000"
+                  title="Number of NFT shares to receive"
+                  description="This is the number of shares that will be created for your NFT."
+                  data={`${nftTokenAmount} shares`}
+                  secondaryData={`of ${nftTitle}`}
                 />
-                <FractionateModalInfoRow
-                  title="Transaction Fee"
-                  description="Pays the Ethereum network to process your transaction. Spent even if the transaction fails."
-                  data="0.02 Eth"
-                  secondaryData="$0.18"
-                />
-                <FractionateModalInfoRow
-                  title="Estimated Time"
-                  description="Commiting changes to the blockchain requires time for your transaction to be mined."
-                  data={estimatedTimeForDisplay()}
-                />
+                {/*<FractionateModalInfoRow*/}
+                {/*  title="DAI to deposit"*/}
+                {/*  description="In order for people to purchase fractions of this NFT, this DAI will be sent to the balancer pool along with the NFT tokens."*/}
+                {/*  data="1,000 DAI"*/}
+                {/*  secondaryData="approximately $1,000"*/}
+                {/*/>*/}
+                {/*<FractionateModalInfoRow*/}
+                {/*  title="Transaction Fee"*/}
+                {/*  description="Pays the Ethereum network to process your transaction. Spent even if the transaction fails."*/}
+                {/*  data="0.02 Eth"*/}
+                {/*  secondaryData="$0.18"*/}
+                {/*/>*/}
+                {/*<FractionateModalInfoRow*/}
+                {/*  title="Estimated Time"*/}
+                {/*  description="Commiting changes to the blockchain requires time for your transaction to be mined."*/}
+                {/*  data={estimatedTimeForDisplay()}*/}
+                {/*/>*/}
               </Flex>
               <Flex justifyContent="flex-end">
-                <Button.Outline onClick={closeModal} mr={1}>Cancel</Button.Outline>
-                {!transactionInProgress
-                  ? <Button onClick={userFractionateConfirm}>Fractionate!</Button>
-                  : <Button disabled>Fractionate!</Button>
-                }
+                <Button.Outline onClick={closeModal} mr={1}>Close</Button.Outline>
+                {isEmpty(fractionateTransaction) && (
+                  <Button
+                    onClick={userFractionateConfirm}
+                    disabled={!!transactionInProgress}
+                  >
+                    Fractionate
+                  </Button>
+                )}
               </Flex>
             </Flex>
           </Box>
@@ -233,6 +290,35 @@ const FractionateButton = ({
 
 FractionateButton.propTypes = {
   buttonProps: PropTypes.object,
+  approveTokenTransaction: PropTypes.func,
+  transactions: PropTypes.array,
+  connectedWalletAddress: PropTypes.string,
+  waitingForTransactionSubmit: PropTypes.bool,
+  networkId: PropTypes.number,
+  selectedNft: PropTypes.object,
+  nftTokenAmount: PropTypes.number,
 };
 
-export default FractionateButton;
+const mapStateToProps = ({
+  transactions: {
+    data: transactions,
+    waitingForSubmit: waitingForTransactionSubmit,
+  },
+  wallet: {
+    connected: {
+      networkId,
+      address: connectedWalletAddress,
+    },
+  },
+}) => ({
+  transactions,
+  connectedWalletAddress,
+  waitingForTransactionSubmit,
+  networkId,
+});
+
+const mapDispatchToProps = {
+  approveTokenTransaction: approveTokenTransactionAction,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(FractionateButton);

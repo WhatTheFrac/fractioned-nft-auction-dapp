@@ -9,6 +9,7 @@ import isEmpty from 'lodash/isEmpty';
 // components
 import Wallet from '../components/Wallet';
 import FractionateForm from '../components/FractionateForm';
+import AuctionDisplay from '../components/AuctionDisplay';
 import Tabs from '../components/Tabs';
 
 // utils
@@ -52,6 +53,11 @@ const App = (props) => {
       getConnectedWallet();
       setAppLoading(false);
     }
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', () => {
+        getConnectedWallet();
+      });
+    }
   }, [appLoading]);
 
   if (!isSupportedBrowser) {
@@ -76,7 +82,11 @@ const App = (props) => {
     {
       title: "Sell",
       content: <Text textAlign="center">(╯°□°)╯︵ [AUCTION]</Text>,
-    }
+    },
+    {
+      title: "Auction",
+      content: <AuctionDisplay />,
+    },
   ];
 
   return (
@@ -88,7 +98,7 @@ const App = (props) => {
             <Wallet />
           </TopRight>
           <Flash my={3} variant="danger">
-            This is untested, and is not garunteed to work. Do not use with any real funds or items.
+            This is untested and is not guaranteed to work. Do not use with any real funds or items.
           </Flash>
           <Box>
             <Tabs tabData={tabData} />

@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Flash, Button, Flex, Card, Box, Text, Loader } from 'rimble-ui';
+import { Flash, Button, Flex, Box, Text, Loader } from 'rimble-ui';
 import isEmpty from 'lodash/isEmpty';
 import styled from 'styled-components';
 
@@ -12,7 +12,7 @@ import TokenBalance from './TokenBalance';
 import { connectWalletAction } from '../actions/walletActions';
 
 // utils
-import { getNetworkNameById, truncateHexString } from '../utils';
+import { getDaiAddress, getNetworkNameById, truncateHexString } from '../utils';
 
 
 const BoxWrapper = styled(Box)`
@@ -39,9 +39,17 @@ const Wallet = (props) => {
       isConnecting,
     },
   } = props;
+
   const connectedNetworkValue = connectedWallet.networkId === 1
     ? 'Connected'
     : `Connected (${getNetworkNameById(connectedWallet.networkId)})`;
+
+  const {
+    REACT_APP_ACCEPTED_TOKEN_SYMBOL: symbol,
+    REACT_APP_ACCEPTED_TOKEN_DECIMALS: decimals,
+  } = process.env;
+  const address = getDaiAddress(connectedWallet.networkId);
+
   return (
     <>
       {isEmpty(connectedWallet) && !isConnecting && (
@@ -55,9 +63,9 @@ const Wallet = (props) => {
           </Flex>
           <InlineSeparator />
           <TokenBalance
-            symbol={process.env.REACT_APP_ACCEPTED_TOKEN_SYMBOL}
-            address={process.env.REACT_APP_ACCEPTED_TOKEN_ADDRESS}
-            decimals={Number(process.env.REACT_APP_ACCEPTED_TOKEN_DECIMALS)}
+            address={address}
+            symbol={symbol}
+            decimals={decimals}
             noLogo
           />
         </BoxWrapper>
