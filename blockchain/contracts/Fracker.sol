@@ -17,6 +17,7 @@ import "./interfaces/IBPool.sol";
 
 // TODO safeMath
 // TODO incentives for calling settle() and claimProceeds()
+// TODO events
 
 contract Fracker is ReentrancyGuard {
     using Address for address;
@@ -28,6 +29,8 @@ contract Fracker is ReentrancyGuard {
     address tokenImplementation;
 
     IERC20 public DAI;
+
+    uint256 public constant CLAIM_FEE = 50; // 5%
 
     struct FrackedToken {
         IERC721 nftContract;
@@ -184,13 +187,21 @@ contract Fracker is ReentrancyGuard {
         }
 
         uint256 payoutAmount = frackedTokenData.lastBid * burnAmount / fracToken.totalSupply();
+        // Calc fee
+        uint256 feeAmount = payoutAmount * CLAIM_FEE / 1000;
         frackedTokenData.lastBid = payoutAmount;
 
-        try DAI.transfer(_user, payoutAmount) {
+        try DAI.transfer(_user, payoutAmount - feeAmount) {
             // nothing
         } catch { 
             // nothing
         }
+        try DAI.transfer(msg.sender, feeAmount) {
+            // nothing
+        } catch {
+            // nothing
+        }
+
         fracToken.destroyTokens(_user, burnAmount);
     }
 
@@ -224,7 +235,15 @@ contract Fracker is ReentrancyGuard {
             // nothing
         }
         
-        try DAI.transfer(fracker, poolTokenAmount) {
+        uint256 feeAmount = poolTokenAmount * CLAIM_FEE / 1000;
+
+        try DAI.transfer(fracker, poolTokenAmount - feeAmount) {
+            // nothing
+        } catch {
+            // nothing
+        }
+
+        try DAI.transfer(msg.sender, feeAmount) {
             // nothing
         } catch {
             // nothing
