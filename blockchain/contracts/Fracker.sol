@@ -16,8 +16,9 @@ import "./interfaces/IBPool.sol";
 // TODO consider making fracked token position an nft by itself 🤯
 
 // TODO safeMath
-// TODO incentives for calling settle() and claimProceeds()
-// TODO events
+// TODO limit gas usage on transfer of tokens (DOS protection)
+// TODO NatSpec
+// TODO Unit tests
 
 contract Fracker is ReentrancyGuard {
     using Address for address;
@@ -51,6 +52,12 @@ contract Fracker is ReentrancyGuard {
 
     FrackedToken[] public frackedTokens;
     IBFactory public balancerFactory;
+
+    event TokenFracked(address indexed fracker, address indexed nftContract, uint256 indexed frackID);
+    event BalancerPoked(address indexed poker, uint256 indexed frackID, uint256 newWeightA, uint256 newWeightB);
+    event BidReceived(address indexed bidder, address indexed nftContract, uint256 indexed frackID, uint256 amount);
+    event Settled(address indexed settler, uint256 indexed frackID, uint256 winningBid);
+    event ProceedsClaimed(address indexed caller, address indexed user, uint256 indexed frackID);
 
     constructor(address _balancerFactory, address _DAI) public {
         balancerFactory = IBFactory(_balancerFactory);
@@ -150,6 +157,7 @@ contract Fracker is ReentrancyGuard {
         }
 
 
+        emit TokenFracked(msg.sender, _nftAddress, frackedTokens.length - 1);
     }
 
     // Pokes the balancer weights
@@ -166,6 +174,8 @@ contract Fracker is ReentrancyGuard {
 
         frackedTokenData.balancerPool.rebind(address(tokenA), frackedTokenData.balancerPool.getBalance(address(tokenA)), newWeightA);
         frackedTokenData.balancerPool.rebind(address(DAI), frackedTokenData.balancerPool.getBalance(address(DAI)), newWeightB);
+
+        emit BalancerPoked(msg.sender, _frackID, newWeightA, newWeightB);
     }
 
 
@@ -203,6 +213,7 @@ contract Fracker is ReentrancyGuard {
         }
 
         fracToken.destroyTokens(_user, burnAmount);
+        emit ProceedsClaimed(msg.sender, _user, _frackID);
     }
 
     // TODO catch revert on failure to send
@@ -249,6 +260,8 @@ contract Fracker is ReentrancyGuard {
             // nothing
         }
 
+        emit Settled(msg.sender, _frackID, frackedTokenData.lastBid);
+
         // Set settled
         frackedTokenData.fracker = address(0);
         // Claim proceeds of fracked token
@@ -260,9 +273,10 @@ contract Fracker is ReentrancyGuard {
         } catch {
             // nothing
         }
+
+        
     }
 
-    // TODO catch transfer failure
     function bid(uint256 _frackID, uint256 _amount) external nonReentrant {
         FrackedToken storage frackedTokenData = frackedTokens[_frackID];
         require(block.timestamp < frackedTokenData.frackTime + frackedTokenData.auctionDuration, "Auction has passed");
@@ -283,6 +297,8 @@ contract Fracker is ReentrancyGuard {
 
         frackedTokenData.lastBid = _amount;
         frackedTokenData.lastBidder = msg.sender;
+
+        emit BidReceived(msg.sender, address(frackedTokenData.nftContract), _frackID, _amount);
     }
 
     // Boiler plate controller methods
