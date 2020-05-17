@@ -35,6 +35,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^3.0.0",
     "@pie-dao/mock-contracts": "^0.0.8",
+    "@pie-dao/proxy": "^0.0.8",
     "@pie-dao/smart-pools": "^0.0.1"
   }
 }
