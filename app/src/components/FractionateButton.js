@@ -6,7 +6,7 @@ import isEmpty from 'lodash/isEmpty';
 import { connect } from 'react-redux';
 
 // actions
-import { approveTokenTransactionAction } from '../actions/transactionActions';
+import { fractionateTransactionAction } from '../actions/transactionActions';
 
 // constants
 import {
@@ -29,7 +29,7 @@ import {
 
 const FractionateButton = ({
   buttonProps,
-  approveTokenTransaction,
+  fractionateTransaction,
   connectedWalletAddress,
   transactions,
   waitingForTransactionSubmit,
@@ -74,21 +74,21 @@ const FractionateButton = ({
 
 
   // TODO: change to fractionalize transaction type
-  const fractionateTransaction = transactions.find(
-    ({ type, from }) => type === TRANSACTION_TYPE.TOKEN_APPROVE
+  const transaction = transactions.find(
+    ({ type, from }) => type === TRANSACTION_TYPE.FRACTIONATE
       && isCaseInsensitiveEqual(from, connectedWalletAddress)
   ) || {};
-  const transactionInProgress = fractionateTransaction.status === STATUS_PENDING;
+  const transactionInProgress = transaction.status === STATUS_PENDING;
 
   useEffect(() => {
-    if (fractionateTransaction.status === STATUS_CONFIRMED) setShowSuccessDialog(true);
+    if (transaction.status === STATUS_CONFIRMED) setShowSuccessDialog(true);
   }, [transactions])
 
 
   const userFractionateConfirm = (e) => {
     e.preventDefault();
     // TODO: change to fractionalize transaction action with its param
-    approveTokenTransaction();
+    fractionateTransaction();
   };
 
   // TODO call this when the transaction actually succeeds
@@ -177,7 +177,7 @@ const FractionateButton = ({
           </Flex>
           <Box p={[3, 4]}>
             <Flex justifyContent={"space-between"} flexDirection={"column"}>
-              {isEmpty(fractionateTransaction) && (
+              {isEmpty(transaction) && (
                 <Text textAlign="center">
                   Please look over the details of your Fractionalization – this can't be undone!
                 </Text>
@@ -193,7 +193,7 @@ const FractionateButton = ({
                 my={[3, 4]}
               >
                 {waitingForTransactionSubmit && metamaskConfirmIndicator}
-                {!isEmpty(fractionateTransaction) && (
+                {!isEmpty(transaction) && (
                   <Flex
                     bg="primary"
                     p={3}
@@ -211,7 +211,7 @@ const FractionateButton = ({
                         fontSize={3}
                         lineHeight={"1.25em"}
                       >
-                        {fractionateTransaction.status === STATUS_PENDING ? 'Waiting for confirmation...' : 'Transaction confirmed'}
+                        {transaction.status === STATUS_PENDING ? 'Waiting for confirmation...' : 'Transaction confirmed'}
                       </Text>
                     </Box>
 
@@ -223,7 +223,7 @@ const FractionateButton = ({
                           fontSize={1}
                           lineHeight={"1.25em"}
                           target="_blank"
-                          href={getTransactionDetailsLink(fractionateTransaction.hash, networkId)}
+                          href={getTransactionDetailsLink(transaction.hash, networkId)}
                         >
                           Transaction details
                           <Icon
@@ -269,7 +269,7 @@ const FractionateButton = ({
               </Flex>
               <Flex justifyContent="flex-end">
                 <Button.Outline onClick={closeModal} mr={1}>Close</Button.Outline>
-                {isEmpty(fractionateTransaction) && (
+                {isEmpty(transaction) && (
                   <Button
                     onClick={userFractionateConfirm}
                     disabled={!!transactionInProgress}
@@ -290,7 +290,7 @@ const FractionateButton = ({
 
 FractionateButton.propTypes = {
   buttonProps: PropTypes.object,
-  approveTokenTransaction: PropTypes.func,
+  fractionateTransaction: PropTypes.func,
   transactions: PropTypes.array,
   connectedWalletAddress: PropTypes.string,
   waitingForTransactionSubmit: PropTypes.bool,
@@ -318,7 +318,7 @@ const mapStateToProps = ({
 });
 
 const mapDispatchToProps = {
-  approveTokenTransaction: approveTokenTransactionAction,
+  fractionateTransaction: fractionateTransactionAction,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(FractionateButton);
