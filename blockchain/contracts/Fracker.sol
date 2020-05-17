@@ -16,11 +16,7 @@ import "./interfaces/IBPool.sol";
 // TODO consider making fracked token position an nft by itself 🤯
 
 // TODO safeMath
-// TODO Reentry protection
-// TODO catching revert on transfers (anti DOS)
-// TODO consider removing min bid 
 // TODO incentives for calling settle() and claimProceeds()
-// TODO ClaimProceeds
 
 contract Fracker is ReentrancyGuard {
     using Address for address;
@@ -190,7 +186,11 @@ contract Fracker is ReentrancyGuard {
         uint256 payoutAmount = frackedTokenData.lastBid * burnAmount / fracToken.totalSupply();
         frackedTokenData.lastBid = payoutAmount;
 
-        DAI.transfer(_user, payoutAmount);
+        try DAI.transfer(_user, payoutAmount) {
+            // nothing
+        } catch { 
+            // nothing
+        }
         fracToken.destroyTokens(_user, burnAmount);
     }
 
@@ -218,8 +218,17 @@ contract Fracker is ReentrancyGuard {
         address fracker = frackedTokenData.fracker;
 
         // Send tokens to fracker
-        fracToken.transfer(fracker, fracTokenAmount);
-        DAI.transfer(fracker, poolTokenAmount);
+        try fracToken.transfer(fracker, fracTokenAmount) {
+            // nothing
+        } catch {
+            // nothing
+        }
+        
+        try DAI.transfer(fracker, poolTokenAmount) {
+            // nothing
+        } catch {
+            // nothing
+        }
 
         // Set settled
         frackedTokenData.fracker = address(0);
@@ -227,7 +236,11 @@ contract Fracker is ReentrancyGuard {
         _claimProceeds(_frackID, fracker);
 
         // Send NFT to winner
-        frackedTokenData.nftContract.transferFrom(address(this), frackedTokenData.lastBidder, frackedTokenData.nftId);
+        try frackedTokenData.nftContract.transferFrom(address(this), frackedTokenData.lastBidder, frackedTokenData.nftId) {
+            // nothing
+        } catch {
+            // nothing
+        }
     }
 
     // TODO catch transfer failure
@@ -239,7 +252,11 @@ contract Fracker is ReentrancyGuard {
 
         if(frackedTokenData.lastBidder != address(0)) {
             // Send back previous bid to previous bidder
-            DAI.transfer(frackedTokenData.lastBidder, frackedTokenData.lastBid);
+            try DAI.transfer(frackedTokenData.lastBidder, frackedTokenData.lastBid) {
+                // nothing
+            } catch {
+                // nothing
+            }
         }
 
         // Pull new bid

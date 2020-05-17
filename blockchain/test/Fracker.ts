@@ -44,7 +44,6 @@ describe("Fracker", function() {
 
     describe("fractionalize", async() => {
         it("Should work", async() => {
-            const testName = "TESTNAME";
             const testSymbol = "TESTSYMBOL";
             const initialSupply = parseEther("1000000");
             const oneDay = new BigNumber(60 * 60 * 24);
