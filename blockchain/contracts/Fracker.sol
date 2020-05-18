@@ -12,9 +12,6 @@ import "./interfaces/INFTReceiver.sol";
 import "./interfaces/ITokenReceiver.sol";
 import "./interfaces/IBPool.sol";
 
-
-// TODO consider making fracked token position an nft by itself 🤯
-
 // TODO safeMath
 // TODO limit gas usage on transfer of tokens (DOS protection)
 // TODO NatSpec
@@ -47,7 +44,6 @@ contract Fracker is ReentrancyGuard {
         uint256 auctionDuration;
         address lastBidder;
         uint256 lastBid;
-        // bool settled;
     }
 
     FrackedToken[] public frackedTokens;
@@ -74,10 +70,8 @@ contract Fracker is ReentrancyGuard {
         string memory _symbol,
         uint256 _initialSupply,
         uint256 _amountToPool,
-        // address _poolToken, // e.g DAI
         uint256 _targetPrice, // estimated value of nft
         uint256 _balancerFlipDuration, // How long it takes to flip the weight
-        // uint256 _auctionToken,
         uint256 _minAuctionBid,
         uint256 _minBidIncrease,
         uint256 _auctionDuration
@@ -119,11 +113,9 @@ contract Fracker is ReentrancyGuard {
         {
             frackedTokenData.nftContract = IERC721(_nftAddress);
             frackedTokenData.nftId = _nftId;
-            // frackedTokenData.poolToken = IERC20(_poolToken);
             frackedTokenData.frackTime = block.timestamp;
             frackedTokenData.balancerFlipDuration = _balancerFlipDuration;
             frackedTokenData.fracker = msg.sender;
-            // frackedTokenData.auctionToken = IERC20(_auctionToken);
             frackedTokenData.minAuctionBid = _minAuctionBid;
             frackedTokenData.minBidIncrease = _minBidIncrease;
             frackedTokenData.auctionDuration = _auctionDuration;
@@ -137,15 +129,13 @@ contract Fracker is ReentrancyGuard {
             IBPool balancerPool = IBPool(balancerFactory.newBPool());
             frackedTokenData.balancerPool = balancerPool;
 
-            // TODO handle partial pooling
-
-            // // // Bind fraction token
+            // Bind fraction token
             token.approve(address(balancerPool), _amountToPool);
             balancerPool.bind(address(token), _amountToPool, BALANCER_98);
 
-            // // Amount of pool token should be 2%
+            // Amount of pool token should be 2%
             uint256 poolTokenAmount = _targetPrice * _amountToPool / _initialSupply * 2 / 100;
-            // // Bind other token
+            // Bind other token
             DAI.transferFrom(msg.sender, address(this), poolTokenAmount);
             DAI.approve(address(balancerPool), poolTokenAmount);
             balancerPool.bind(address(DAI), poolTokenAmount, BALANCER_2);
@@ -163,7 +153,6 @@ contract Fracker is ReentrancyGuard {
     // Pokes the balancer weights
     function poke(uint256 _frackID) external nonReentrant {
         FrackedToken storage frackedTokenData = frackedTokens[_frackID];
-
 
         uint256 weightDifference = BALANCER_98 - BALANCER_2;
         uint256 timePassed = block.timestamp - frackedTokenData.frackTime;
@@ -273,8 +262,6 @@ contract Fracker is ReentrancyGuard {
         } catch {
             // nothing
         }
-
-        
     }
 
     function bid(uint256 _frackID, uint256 _amount) external nonReentrant {
