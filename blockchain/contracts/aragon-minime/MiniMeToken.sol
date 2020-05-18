@@ -35,8 +35,6 @@ contract Controlled {
 
     address public controller;
 
-    constructor()  public { controller = msg.sender;}
-
     /// @notice Changes the controller of the contract
     /// @param _newController The new controller of the contract
     function changeController(address _newController) onlyController public {
@@ -104,11 +102,13 @@ contract MiniMeToken is Controlled {
     // The factory used to create new clone tokens
     MiniMeTokenFactory public tokenFactory;
 
+    bool initialised;
+
 ////////////////
 // Constructor
 ////////////////
 
-    /// @notice Constructor to create a MiniMeToken
+    /// @notice Init to create a MiniMeToken
     /// @param _tokenFactory The address of the MiniMeTokenFactory contract that
     ///  will create the Clone token contracts, the token factory needs to be
     ///  deployed first
@@ -121,7 +121,7 @@ contract MiniMeToken is Controlled {
     /// @param _decimalUnits Number of decimals of the new token
     /// @param _tokenSymbol Token Symbol for the new token
     /// @param _transfersEnabled If true, tokens will be able to be transferred
-   constructor(
+   function init(
         address _tokenFactory,
         address _parentToken,
         uint _parentSnapShotBlock,
@@ -130,7 +130,9 @@ contract MiniMeToken is Controlled {
         string memory _tokenSymbol,
         bool _transfersEnabled
     )  public
-    {
+    {   
+        require(!initialised, "Already initialised");
+        initialised = true;
         tokenFactory = MiniMeTokenFactory(payable(_tokenFactory));
         name = _tokenName;                                 // Set the name
         decimals = _decimalUnits;                          // Set the decimals
@@ -139,6 +141,7 @@ contract MiniMeToken is Controlled {
         parentSnapShotBlock = _parentSnapShotBlock;
         transfersEnabled = _transfersEnabled;
         creationBlock = block.number;
+        controller = msg.sender;
     }
 
 
@@ -561,7 +564,9 @@ contract MiniMeTokenFactory {
         bool _transfersEnabled
     ) public returns (MiniMeToken)
     {
-        MiniMeToken newToken = new MiniMeToken(
+        MiniMeToken newToken = new MiniMeToken();
+
+        newToken.init(
             address(this),
             address(_parentToken),
             _snapshotBlock,

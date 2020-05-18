@@ -11,7 +11,9 @@ contract MockERC721 is ERC721 {
     }
 
     function mint(address _to, uint256 _amount) external {
-        _mint(_to, nftCounter);
-        nftCounter ++;
+        for(uint256 i = 0; i < _amount; i ++) {
+            _mint(_to, nftCounter);
+            nftCounter ++;
+        }
     }
 }
