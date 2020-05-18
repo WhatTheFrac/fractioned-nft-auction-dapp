@@ -1,20 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { Field, Input, Card, Flex, Heading, Text, Avatar } from 'rimble-ui';
+import {
+  Field,
+  Input,
+  Card,
+  Flex,
+  Heading,
+  Text,
+  Avatar,
+  Button,
+  Box,
+  Icon,
+  Loader,
+  Tooltip,
+  theme,
+} from 'rimble-ui';
+import { Dai as DaiIcon } from '@rimble/icons';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Dropdown from 'react-dropdown';
-import 'react-dropdown/style.css';
 
+// actions
+import { approveTokenTransactionAction } from '../actions/transactionActions';
 
 // components
 import NftAssetsSelect from './NftAssetsSelect';
 import FractionateButton from './FractionateButton';
 
+// constants
+import { STATUS_PENDING, TRANSACTION_TYPE } from '../constants/transactionConstants';
+
 // utils
-import { parseNumberInputValue } from '../utils';
-import { theme } from 'rimble-ui';
+import {
+  getDaiAddress,
+  getFrackerContractAddress,
+  getTokenAllowance,
+  parseNumberInputValue,
+} from '../utils';
 
 
 const FormWrapper = styled.div`
@@ -71,7 +94,27 @@ const StyledDropdown = styled(Dropdown)`
   width: 100%;
 `
 
-const FractionateForm = ({ nftAssets }) => {
+const renderHeading = (title, description) => (
+  <Heading as={"h3"} px={30} pt={40} pb={20}>
+    {title}
+    {!!description && (
+      <Box ml={1} display="inline-block">
+        <Tooltip message={description}>
+          <Icon name="Info" size={15} color="#4E3FCE" />
+        </Tooltip>
+      </Box>
+    )}
+  </Heading>
+);
+
+const FractionateForm = ({
+  nftAssets,
+  balances,
+  transactions,
+  connectedWalletAddress,
+  networkId,
+  approveTokenTransaction,
+}) => {
   const [estimatedValue, setEstimatedValue] = useState('');
   const [fractionCountValue, setFractionCountValue] = useState(1000);
   const [balancerCountValue, setBalancerCountValue] = useState('');
@@ -79,11 +122,24 @@ const FractionateForm = ({ nftAssets }) => {
   const [minBid, setMinBid] = useState('');
   const [minBidIncrease, setMinBidIncrease] = useState('');
   const [auctionDurationSeconds, setAuctionDurationSeconds] = useState('');
+  const [unlockedDaiAmount, setUnlockedDaiAmount] = useState(0);
+  const [gettingDaiAllowance, setGettingDaiAllowance] = useState(false);
+
+  useEffect(() => {
+    if (!gettingDaiAllowance) {
+      setGettingDaiAllowance(true);
+      getTokenAllowance(
+        connectedWalletAddress,
+        getFrackerContractAddress(networkId),
+        getDaiAddress(networkId),
+        18,
+      )
+        .then(setUnlockedDaiAmount)
+        .then(() => setGettingDaiAllowance(false));
+    }
+  }, [transactions])
 
   const selectedNft = nftAssets.find(({ uid }) => uid === selectedNftId) || {};
-  const submitDisabled = isEmpty(selectedNft) || isEmpty(estimatedValue);
-
-  const heading = (title) => <Heading as={"h3"} px={30} pt={40} pb={20}>{title}</Heading>;
 
   const updateFractionCountValue = count => {
     setFractionCountValue(parseInt(count));
@@ -118,10 +174,27 @@ const FractionateForm = ({ nftAssets }) => {
     { value: 2592000, label: "1 month" }
   ];
 
+  const daiAllowanceTransaction = transactions.find((transaction) => transaction.type === TRANSACTION_TYPE.TOKEN_APPROVE) || {};
+  const isDaiAllowanceTransactionPending = daiAllowanceTransaction.status === STATUS_PENDING;
+  const daiAmount = Number((estimatedValue * 0.02).toFixed(18)); // DAI has 18 decimals
+  const { balance: daiBalance = 0 } = balances.find((balance) => balance.symbol === 'DAI') || {};
+  const daiUnlocked = !!daiAmount && unlockedDaiAmount >= daiAmount;
+  const enoughDai = !!daiAmount && daiBalance >= daiAmount;
+  const unlockDaiButtonDisabled = !enoughDai || daiUnlocked || gettingDaiAllowance || isDaiAllowanceTransactionPending;
+
+  let unlockDaiButtonTitle;
+  if (isDaiAllowanceTransactionPending) {
+    unlockDaiButtonTitle = <Text ml={1} mt={-1}>Pending...</Text>;
+  } else {
+    unlockDaiButtonTitle = enoughDai ? 'Unlock DAI' : 'Not enough DAI';
+  }
+
+  const submitDisabled = !daiUnlocked || isEmpty(selectedNft) || isEmpty(estimatedValue);
+
   return (
     <Flex flexDirection="column" justifyContent="center" alignItems="center" pb={80}>
       <FormWrapper>
-        {heading("Deposit NFT")}
+        {renderHeading("Deposit NFT")}
         <InputWrapper mt={3}>
           <Flex flexWrap="wrap" width="100%">
             <Field label="NFT" style={{ flex: 0.52 }}>
@@ -146,7 +219,47 @@ const FractionateForm = ({ nftAssets }) => {
         </InputWrapper>
         {!isEmpty(selectedNft) && !isEmpty(estimatedValue) && (
           <>
-            {heading("Mint Fraction Tokens")}
+            {renderHeading('DAI allowance', 'This is just another explanation.')}
+            <InputWrapper mt={3}>
+              <Flex flexWrap="wrap" width="100%" alignItems="flex-end">
+                <Field
+                  label="DAI amount (2% of NFT estimate)"
+                  style={{ flex: 1 }}
+                  pr={4}
+                >
+                  <Input
+                    type="text"
+                    required
+                    value={daiAmount}
+                    width="100%"
+                    disabled
+                  />
+                </Field>
+                <Flex style={{ marginBottom: 16, flex: 1 }}>
+                  <Button.Outline
+                    style={{ flex: 1 }}
+                    disabled={unlockDaiButtonDisabled}
+                    onClick={() => approveTokenTransaction(daiAmount, getFrackerContractAddress(networkId))}
+                  >
+                    {(!!gettingDaiAllowance || isDaiAllowanceTransactionPending) && <Loader size={20} />}
+                    {!gettingDaiAllowance && unlockDaiButtonTitle}
+                  </Button.Outline>
+                  <DaiIcon size={45} ml={3} />
+                </Flex>
+              </Flex>
+              <StatusText isSuccess={!!daiUnlocked}>
+                <StatusIcon>
+                  {!!daiUnlocked && <Icon name="CheckCircle" color="success" size={17} />}
+                  {!daiUnlocked && <Icon name="Cancel" color="danger" size={17} />}
+                </StatusIcon>
+                {daiUnlocked ? 'Confirmed' : 'Unconfirmed'}
+              </StatusText>
+            </InputWrapper>
+          </>
+        )}
+        {!!daiUnlocked && !isEmpty(selectedNft) && (
+          <>
+            {renderHeading("Mint Fraction Tokens")}
             <InputWrapper mt={3}>
               <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
                 <Field label="How many NFT tokens would you like to create?" style={{ flex: 0.3 }}>
@@ -174,7 +287,7 @@ const FractionateForm = ({ nftAssets }) => {
               {/*  Unconfirmed*/}
               {/*</StatusText>*/}
             </InputWrapper>
-            {heading("Sell Fraction Tokens")}
+            {renderHeading("Sell Fraction Tokens")}
             <InputWrapper mt={3}>
               <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
                 <Field label="What portion would you like to sell?" style={{ flex: 0.3 }}>
@@ -197,9 +310,9 @@ const FractionateForm = ({ nftAssets }) => {
             </InputWrapper>
           </>
         )}
-        {balancerCountValue !== "" && (
+        {!!balancerCountValue && (
           <>
-            {heading("Provide Auction Details")}
+            {renderHeading("Provide Auction Details")}
               <InputWrapper mt={3}>
                 <Flex flexWrap="wrap" width="100%">
                   <Field label="Minimum bid USD" pr={16} style={{ flex: 0.33 }}>
@@ -252,12 +365,33 @@ const FractionateForm = ({ nftAssets }) => {
 
 FractionateForm.propTypes = {
   nftAssets: PropTypes.array,
+  transactions: PropTypes.array,
+  balances: PropTypes.arrayOf(PropTypes.shape({
+    symbol: PropTypes.string,
+    balance: PropTypes.number,
+  })),
+  connectedWalletAddress: PropTypes.string,
+  networkId: PropTypes.number,
+  approveTokenTransaction: PropTypes.func,
 };
 
 const mapStateToProps = ({
-  wallet: { nftAssets },
+  wallet: {
+    nftAssets,
+    balances,
+    connected: { address: connectedWalletAddress, networkId },
+  },
+  transactions: { data: transactions },
 }) => ({
   nftAssets,
+  balances,
+  transactions,
+  connectedWalletAddress,
+  networkId,
 });
 
-export default connect(mapStateToProps)(FractionateForm);
+const mapDispatchToProps = {
+  approveTokenTransaction: approveTokenTransactionAction,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(FractionateForm);

@@ -6,6 +6,9 @@ import { connect } from 'react-redux';
 // utils
 import { getTokenBalance } from '../utils';
 
+// actions
+import { setTokenBalanceAction } from '../actions/walletActions';
+
 
 const TokenBalance = ({
   symbol,
@@ -13,14 +16,16 @@ const TokenBalance = ({
   decimals,
   connectedWalletAddress,
   noLogo,
+  balances,
+  setTokenBalance,
 }) => {
-  const [balance, setBalance] = useState(0);
+  const { balance = 0 } = balances.find((balance) => balance.symbol === symbol) || {};
   const [isFetchingTokenBalance, setIsFetchingTokenBalance] = useState(true)
 
   useEffect(() => {
     if (isFetchingTokenBalance) {
       getTokenBalance(connectedWalletAddress, address, decimals).then((balance) => {
-        setBalance(balance);
+        setTokenBalance({ symbol, balance });
         setIsFetchingTokenBalance(false);
       })
     }
@@ -42,12 +47,22 @@ TokenBalance.propTypes = {
   address: PropTypes.string.isRequired,
   decimals: PropTypes.number.isRequired,
   noLogo: PropTypes.bool,
+  balances: PropTypes.arrayOf(PropTypes.shape({
+    symbol: PropTypes.string,
+    balance: PropTypes.number,
+  })),
+  setTokenBalance: PropTypes.func,
 };
 
 const mapStateToProps = ({
-  wallet: { connected: { address: connectedWalletAddress } },
+  wallet: { connected: { address: connectedWalletAddress }, balances },
 }) => ({
   connectedWalletAddress,
+  balances,
 });
 
-export default connect(mapStateToProps)(TokenBalance);
+const mapDispatchToProps = {
+  setTokenBalance: setTokenBalanceAction,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TokenBalance);

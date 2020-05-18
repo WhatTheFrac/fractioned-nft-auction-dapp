@@ -8,6 +8,7 @@ import { ThemeProvider, createGlobalStyle } from 'styled-components';
 
 // assets
 import './assets/css/react-select-search-default.css';
+import 'react-dropdown/style.css';
 
 // components
 import App from './containers/App';

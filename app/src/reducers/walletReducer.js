@@ -4,6 +4,7 @@ import {
   SET_WALLET_CONNECTING,
   SET_WALLET_NFT_ASSETS_FETCHING,
   SET_WALLET_NFT_ASSETS,
+  SET_TOKEN_BALANCE,
 } from '../constants/walletConstants';
 
 
@@ -12,6 +13,7 @@ const initialState = {
   isFetchingNftAssets: false,
   connected: {},
   nftAssets: [],
+  balances: [],
 };
 
 const collectiblesReducer = (state = initialState, action) => {
@@ -24,6 +26,10 @@ const collectiblesReducer = (state = initialState, action) => {
       return { ...state, isFetchingNftAssets: true };
     case SET_WALLET_NFT_ASSETS:
       return { ...state, nftAssets: action.payload, isFetchingNftAssets: false };
+    case SET_TOKEN_BALANCE:
+      const { symbol } = action.payload;
+      const currentBalances = state.balances.filter((balance) => balance.symbol !== symbol);
+      return { ...state, balances: [...currentBalances, action.payload] };
     default:
       return state;
   }

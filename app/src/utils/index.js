@@ -47,12 +47,25 @@ export const pauseForSeconds = (seconds) => new Promise(resolve => setTimeout(re
 
 export const getERC20Contract = (address) => new window.web3.eth.Contract(erc20Abi, address);
 
+export const parseTokenAmount = (value, decimals = 18) => Number(
+  decimals > 0 ? ethersUtils.formatUnits(value.toString(), decimals) : value.toString(),
+);
+
 export const getTokenBalance = (
   walletAddress,
   tokenAddress,
   tokenDecimals,
 ) => getERC20Contract(tokenAddress).methods.balanceOf(walletAddress).call()
-    .then((balanceInWei) => Number(tokenDecimals > 0 ? Number(balanceInWei) / (10 ** tokenDecimals) : balanceInWei))
+    .then((balanceInWei) => parseTokenAmount(balanceInWei, tokenDecimals))
+    .catch(() => 0);
+
+export const getTokenAllowance = (
+  walletAddress,
+  allowanceAddress,
+  tokenAddress,
+  tokenDecimals,
+) => getERC20Contract(tokenAddress).methods.allowance(walletAddress, allowanceAddress).call()
+    .then((allowanceInWei) => parseTokenAmount(allowanceInWei, tokenDecimals))
     .catch(() => 0);
 
 export const parseNumberInputValue = (rawValue, noDecimals) => {
@@ -80,9 +93,12 @@ export const getDaiAddress = (networkId) => {
   return process.env.REACT_APP_ACCEPTED_TOKEN_ADDRESS_RINKEBY;
 };
 
-export const formatTokenAmount = (value, decimals = 18) => ethersUtils.parseUnits(value.toString(), decimals);
+export const getFrackerContractAddress = (networkId) => {
+  if (networkId === 1) return process.env.REACT_APP_FRACKER_CONTRACT_ADDRESS_MAINNET;
+  return process.env.REACT_APP_FRACKER_CONTRACT_ADDRESS_RINKEBY;
+};
 
-export const parseTokenAmount = (value, decimals = 18) => Number(ethersUtils.formatUnits(value.toString(), decimals));
+export const formatTokenAmount = (value, decimals = 18) => ethersUtils.parseUnits(value.toString(), decimals);
 
 export const getEtherscanHostname = (networkId) => ` https://${networkId === 1 ? '' : 'rinkeby.'}etherscan.io`;
 

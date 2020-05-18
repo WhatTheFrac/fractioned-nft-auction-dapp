@@ -16,25 +16,50 @@ import erc20Abi from '../assets/abi/erc20.json';
 import {
   formatTokenAmount,
   getDaiAddress,
+  getFrackerContractAddress,
   isCaseInsensitiveEqual,
 } from '../utils';
 
 
-export const approveTokenTransactionAction = () => async (dispatch, getState) => {
+export const approveTokenTransactionAction = (amount, address) => async (dispatch, getState) => {
   const { wallet: { connected: connectedWallet } } = getState();
   const { address: connectedWalletAddress, networkId } = connectedWallet;
   const daiAddress = getDaiAddress(networkId);
   const DaiContract = new window.web3.eth.Contract(erc20Abi, daiAddress);
   dispatch({ type: SET_WAITING_FOR_TRANSACTION_SUBMIT });
-  const result = await DaiContract.methods
-    // TODO: change to contract address and actual value
-    .approve('0x8096Da6cEd12B75684054ef16e1bf7e376353c29', formatTokenAmount(0.1))
+  DaiContract.methods
+    .approve(address, formatTokenAmount(amount))
     .send({ from: connectedWalletAddress }, (err, hash) => {
       if (err) return; // TODO: transaction failed notification
       const transaction = {
         hash,
         from: connectedWalletAddress,
         type: TRANSACTION_TYPE.TOKEN_APPROVE,
+        status: STATUS_PENDING,
+      };
+      dispatch({ type: ADD_TRANSACTION, payload: transaction })
+    })
+    .then((result) => {
+      const resultTransactionHash = get(result, 'transactionHash');
+      if (!resultTransactionHash) return; // TODO: transaction failed notification
+      dispatch({ type: SET_TRANSACTION_CONFIRMED, payload: resultTransactionHash })
+    })
+    .catch(() => {});
+};
+
+export const fractionateTransactionAction = () => async (dispatch, getState) => {
+  const { wallet: { connected: connectedWallet } } = getState();
+  const { address: connectedWalletAddress, networkId } = connectedWallet;
+  dispatch({ type: SET_WAITING_FOR_TRANSACTION_SUBMIT });
+  const frackerContractAddress = getFrackerContractAddress(networkId);
+  // TODO: add fractionate contract tx
+  window.web3.eth
+    .sendTransaction({ from: connectedWalletAddress, to: frackerContractAddress }, (err, hash) => {
+      if (err) return; // TODO: transaction failed notification
+      const transaction = {
+        hash,
+        from: connectedWalletAddress,
+        type: TRANSACTION_TYPE.FRACTIONATE,
         status: STATUS_PENDING,
       };
       dispatch({ type: ADD_TRANSACTION, payload: transaction })

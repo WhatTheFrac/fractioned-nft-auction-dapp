@@ -8,6 +8,7 @@ import {
   SET_CONNECTED_WALLET,
   SET_WALLET_NFT_ASSETS_FETCHING,
   SET_WALLET_NFT_ASSETS,
+  SET_TOKEN_BALANCE,
 } from '../constants/walletConstants';
 
 // services
@@ -68,3 +69,8 @@ export const getConnectedWalletAction = () => async (dispatch) => {
   dispatch(fetchWalletNftAssetsAction());
   dispatch(checkPendingTransactionsAction());
 };
+
+export const setTokenBalanceAction = (payload) => ({
+  type: SET_TOKEN_BALANCE,
+  payload,
+})
