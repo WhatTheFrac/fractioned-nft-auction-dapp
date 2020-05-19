@@ -76,16 +76,16 @@ const App = (props) => {
 
   let tabData = [
     {
-      title: "Auctions",
-      content: <AuctionListDisplay />,
-    },
-    {
       title: "Fractionate",
       content: isWalletConnected && <FractionateForm />
     },
     {
       title: "Sell",
       content: <Text textAlign="center">(╯°□°)╯︵ [AUCTION]</Text>,
+    },
+    {
+      title: "Auctions",
+      content: <AuctionListDisplay />,
     },
   ];
 

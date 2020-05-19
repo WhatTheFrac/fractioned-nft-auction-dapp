@@ -4,7 +4,7 @@ import { Avatar, Button, Card, Flex, Heading, Text } from "rimble-ui";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
-import AuctionDisplay from "./AuctionBidDisplay";
+import AuctionDisplay from "./AuctionDisplay";
 import AuctionListDisplayRow from "./AuctionListDisplayRow";
 
 // utils
@@ -14,23 +14,20 @@ const AuctionListDisplay = ({ nftAssets }) => {
   const [selectedAuctionAddress, setSelectedAuctionAddress] = useState('');
 
   const onClickAuction = (auctionAddress) => {
-    alert(auctionAddress);
     setSelectedAuctionAddress(auctionAddress);
   }
-  /*
-  const openModal = e => {
-    e.preventDefault();
-    resetState();
-    setIsOpen(true);
-  };
-  */
   const unselectAuction = () => setSelectedAuctionAddress('');
 
 
   if (selectedAuctionAddress !== "") {
     return (
       <>
-        <Button onClick={unselectAuction}>{"< Go Back"}</Button>
+        <Button.Outline
+          style={{ width: "100px" }}
+          onClick={unselectAuction}
+          mb={20}>
+          {"< Go Back"}
+        </Button.Outline>
         <AuctionDisplay auctionAddress={selectedAuctionAddress} />
       </>
     )
