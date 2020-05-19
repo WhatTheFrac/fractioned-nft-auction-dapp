@@ -37,6 +37,7 @@ import {
   getFrackerContractAddress,
   getTokenAllowance,
   parseNumberInputValue,
+  ExplanationString,
 } from '../utils';
 
 
@@ -125,6 +126,12 @@ const FractionateForm = ({
   const [unlockedDaiAmount, setUnlockedDaiAmount] = useState(0);
   const [gettingDaiAllowance, setGettingDaiAllowance] = useState(false);
 
+  console.log({
+    minBid: minBid,
+    minBidIncrease: minBidIncrease,
+    auctionDurationSeconds: auctionDurationSeconds,
+  });
+
   const DEPOSIT_NFT_EXPLANATION =
     "The NFT that you would like to create fractional shares for, and sell in an auction.";
 
@@ -212,7 +219,7 @@ const FractionateForm = ({
   return (
     <Flex flexDirection="column" justifyContent="center" alignItems="center" pb={80}>
       <FormWrapper>
-        {renderHeading("Deposit NFT", DEPOSIT_NFT_EXPLANATION)}
+        {renderHeading("Deposit NFT", ExplanationString.depositNftExplanation)}
         <InputWrapper mt={3}>
           <Flex flexWrap="wrap" width="100%">
             <Field label="NFT" style={{ flex: 0.52 }}>
@@ -237,7 +244,7 @@ const FractionateForm = ({
         </InputWrapper>
         {!isEmpty(selectedNft) && !isEmpty(estimatedValue) && (
           <>
-            {renderHeading("DAI allowance", DAI_ALLOWANCE_EXPLANATION)}
+            {renderHeading("DAI allowance", ExplanationString.daiAllowanceExplanation)}
             <InputWrapper mt={3}>
               <Flex flexWrap="wrap" width="100%" alignItems="flex-end">
                 <Field
@@ -277,7 +284,7 @@ const FractionateForm = ({
         )}
         {!!daiUnlocked && !isEmpty(selectedNft) && (
           <>
-            {renderHeading("Mint Fraction Tokens", MINT_FRACTION_EXPLANATION)}
+            {renderHeading("Mint Fraction Tokens", ExplanationString.mintFractionExplanation)}
             <InputWrapper mt={3}>
               <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
                 <Field label="How many NFT tokens would you like to create?" style={{ flex: 0.3 }}>
@@ -305,7 +312,7 @@ const FractionateForm = ({
               {/*  Unconfirmed*/}
               {/*</StatusText>*/}
             </InputWrapper>
-            {renderHeading("Sell Fraction Tokens", SELL_FRACTION_EXPLANATION)}
+            {renderHeading("Sell Fraction Tokens", ExplanationString.sellFractionExplanation)}
             <InputWrapper mt={3}>
               <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
                 <Field label="What portion would you like to sell?" style={{ flex: 0.3 }}>
@@ -330,7 +337,7 @@ const FractionateForm = ({
         )}
         {!!balancerCountValue && (
           <>
-            {renderHeading("Provide Auction Details", AUCTION_EXPLANATION)}
+            {renderHeading("Provide Auction Details", ExplanationString.auctionExplanation)}
               <InputWrapper mt={3}>
                 <Flex flexWrap="wrap" width="100%">
                   <Field label="Minimum bid USD" pr={16} style={{ flex: 0.33 }}>
@@ -371,6 +378,10 @@ const FractionateForm = ({
       <FractionateButton
         selectedNft={selectedNft}
         nftTokenAmount={Number(fractionCountValue) || 1000}
+        nftTokenSellAmount={Number(balancerCountValue)}
+        minBid={Number(minBid)}
+        minBidIncrease={Number(minBidIncrease.value)}
+        auctionDurationSeconds={Number(auctionDurationSeconds.value)}
         buttonProps={{
           disabled: !!submitDisabled,
           mt: 40,

@@ -24,6 +24,7 @@ import FractionateFailureDialog from './FractionateFailureDialog';
 import {
   getTransactionDetailsLink,
   isCaseInsensitiveEqual,
+  ExplanationString,
 } from '../utils';
 
 
@@ -36,6 +37,10 @@ const FractionateButton = ({
   networkId,
   selectedNft,
   nftTokenAmount,
+  nftTokenSellAmount,
+  minBid,
+  minBidIncrease,
+  auctionDurationSeconds,
 }) => {
   // TODO const { } = props;
 
@@ -239,15 +244,32 @@ const FractionateButton = ({
                 )}
                 <FractionateModalInfoRow
                   title="NFT to deposit"
-                  description="This is the NFT for which this protocol will create fractional shares."
+                  description={ExplanationString.depositNftExplanation}
                   data={nftTitle}
                   secondaryData={tokenAddress}
                 />
                 <FractionateModalInfoRow
                   title="Number of NFT shares to receive"
-                  description="This is the number of shares that will be created for your NFT."
+                  description={ExplanationString.mintFractionExplanation}
                   data={`${nftTokenAmount} shares`}
                   secondaryData={`of ${nftTitle}`}
+                />
+                <FractionateModalInfoRow
+                  title="Number of NFT shares to sell"
+                  description={ExplanationString.sellFractionExplanation}
+                  data={`${nftTokenSellAmount} shares`}
+                  secondaryData={`of ${nftTitle}`}
+                />
+                <FractionateModalInfoRow
+                  title="Auction Bid Settings"
+                  description={ExplanationString.auctionExplanation}
+                  data={`Min bid: ${minBid} shares`}
+                  secondaryData={`Min bid increase: ${minBidIncrease}%`}
+                />
+                <FractionateModalInfoRow
+                  title="Auction Duration"
+                  description={ExplanationString.auctionDurationExplanation}
+                  data={`${auctionDurationSeconds} seconds`}
                 />
                 {/*<FractionateModalInfoRow*/}
                 {/*  title="DAI to deposit"*/}
@@ -268,7 +290,7 @@ const FractionateButton = ({
                 {/*/>*/}
               </Flex>
               <Flex justifyContent="flex-end">
-                <Button.Outline onClick={closeModal} mr={1}>Close</Button.Outline>
+                <Button.Outline onClick={closeModal} mr={1}>Wait! Go back.</Button.Outline>
                 {isEmpty(transaction) && (
                   <Button
                     onClick={userFractionateConfirm}
@@ -297,6 +319,10 @@ FractionateButton.propTypes = {
   networkId: PropTypes.number,
   selectedNft: PropTypes.object,
   nftTokenAmount: PropTypes.number,
+  nftTokenSellAmount: PropTypes.number,
+  minBid: PropTypes.number,
+  minBidIncrease: PropTypes.number,
+  auctionDurationSeconds: PropTypes.number,
 };
 
 const mapStateToProps = ({
