@@ -25,7 +25,7 @@ const Centered = styled.div`
   transform: translate(-50%, -50%);
 `;
 
-const AuctionDisplay = ({ nftAssets }) => {
+const AuctionDisplay = ({ nftAssets, auctionAddress }) => {
   // TODO implement these data/action functions
   const handleBidSubmit = (bid) => alert("Bid button clicked with bid: " + bid);
   const handleClaimNFT = () => alert("claim nft button clicked");
@@ -113,6 +113,7 @@ const AuctionDisplay = ({ nftAssets }) => {
 
 AuctionDisplay.propTypes = {
   nftAssets: PropTypes.array,
+  auctionAddress: PropTypes.string,
 };
 
 const mapStateToProps = ({ wallet: { nftAssets } }) => ({
