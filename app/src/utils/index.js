@@ -114,3 +114,20 @@ export const AuctionState = {
   WON_PAYOUT: 'won_payout',
   AUCTION_OVER: 'auction_over',
 };
+
+export const ExplanationString = {
+  depositNftExplanation:
+    "The NFT that you would like to create fractional shares for, and sell in an auction.",
+  daiAllowanceExplanation:
+    "In order to sell your fractional tokens in the balancer pool, "
+    + "you need to seed the pool with dai liquidity.",
+  mintFractionExplanation:
+    "This is the number of fractional tokens you would like to create, "
+    + "these will represent ownership of the token and holders will get a proportional "
+    + "fraction of the auction proceeds.",
+  sellFractionExplanation:
+    "The number of the newly created fractional tokens you would like to distribute through the Balancer pool.",
+  auctionExplanation:
+    "Details of the auction in which this NFT is sold and you get your share of the proceeds.",
+  auctionDurationExplanation: "How long from now the Auction will conclude.",
+}

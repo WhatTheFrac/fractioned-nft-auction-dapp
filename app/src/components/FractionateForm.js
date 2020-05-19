@@ -37,6 +37,7 @@ import {
   getFrackerContractAddress,
   getTokenAllowance,
   parseNumberInputValue,
+  ExplanationString,
 } from '../utils';
 
 
@@ -125,6 +126,30 @@ const FractionateForm = ({
   const [unlockedDaiAmount, setUnlockedDaiAmount] = useState(0);
   const [gettingDaiAllowance, setGettingDaiAllowance] = useState(false);
 
+  console.log({
+    minBid: minBid,
+    minBidIncrease: minBidIncrease,
+    auctionDurationSeconds: auctionDurationSeconds,
+  });
+
+  const DEPOSIT_NFT_EXPLANATION =
+    "The NFT that you would like to create fractional shares for, and sell in an auction.";
+
+  const DAI_ALLOWANCE_EXPLANATION =
+    "In order to sell your fractional tokens in the balancer pool, "
+    + "you need to seed the pool with dai liquidity.";
+
+  const MINT_FRACTION_EXPLANATION =
+    "This is the number of fractional tokens you would like to create, "
+    + "these will represent ownership of the token and holders will get a proportional "
+    + "fraction of the auction proceeds.";
+
+  const SELL_FRACTION_EXPLANATION =
+    "The number of the newly created fractional tokens you would like to distribute through the Balancer pool.";
+
+  const AUCTION_EXPLANATION =
+    "Details of the auction in which this NFT is sold and you get your share of the proceeds.";
+
   useEffect(() => {
     if (!gettingDaiAllowance) {
       setGettingDaiAllowance(true);
@@ -189,12 +214,12 @@ const FractionateForm = ({
     unlockDaiButtonTitle = enoughDai ? 'Unlock DAI' : 'Not enough DAI';
   }
 
-  const submitDisabled = !daiUnlocked || isEmpty(selectedNft) || isEmpty(estimatedValue);
+  const submitDisabled = !minBid || !minBidIncrease || !auctionDurationSeconds
 
   return (
     <Flex flexDirection="column" justifyContent="center" alignItems="center" pb={80}>
       <FormWrapper>
-        {renderHeading("Deposit NFT")}
+        {renderHeading("Deposit NFT", ExplanationString.depositNftExplanation)}
         <InputWrapper mt={3}>
           <Flex flexWrap="wrap" width="100%">
             <Field label="NFT" style={{ flex: 0.52 }}>
@@ -219,7 +244,7 @@ const FractionateForm = ({
         </InputWrapper>
         {!isEmpty(selectedNft) && !isEmpty(estimatedValue) && (
           <>
-            {renderHeading('DAI allowance', 'This is just another explanation.')}
+            {renderHeading("DAI allowance", ExplanationString.daiAllowanceExplanation)}
             <InputWrapper mt={3}>
               <Flex flexWrap="wrap" width="100%" alignItems="flex-end">
                 <Field
@@ -259,7 +284,7 @@ const FractionateForm = ({
         )}
         {!!daiUnlocked && !isEmpty(selectedNft) && (
           <>
-            {renderHeading("Mint Fraction Tokens")}
+            {renderHeading("Mint Fraction Tokens", ExplanationString.mintFractionExplanation)}
             <InputWrapper mt={3}>
               <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
                 <Field label="How many NFT tokens would you like to create?" style={{ flex: 0.3 }}>
@@ -287,7 +312,7 @@ const FractionateForm = ({
               {/*  Unconfirmed*/}
               {/*</StatusText>*/}
             </InputWrapper>
-            {renderHeading("Sell Fraction Tokens")}
+            {renderHeading("Sell Fraction Tokens", ExplanationString.sellFractionExplanation)}
             <InputWrapper mt={3}>
               <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
                 <Field label="What portion would you like to sell?" style={{ flex: 0.3 }}>
@@ -312,7 +337,7 @@ const FractionateForm = ({
         )}
         {!!balancerCountValue && (
           <>
-            {renderHeading("Provide Auction Details")}
+            {renderHeading("Provide Auction Details", ExplanationString.auctionExplanation)}
               <InputWrapper mt={3}>
                 <Flex flexWrap="wrap" width="100%">
                   <Field label="Minimum bid USD" pr={16} style={{ flex: 0.33 }}>
@@ -353,6 +378,10 @@ const FractionateForm = ({
       <FractionateButton
         selectedNft={selectedNft}
         nftTokenAmount={Number(fractionCountValue) || 1000}
+        nftTokenSellAmount={Number(balancerCountValue)}
+        minBid={Number(minBid)}
+        minBidIncrease={Number(minBidIncrease.value)}
+        auctionDurationSeconds={Number(auctionDurationSeconds.value)}
         buttonProps={{
           disabled: !!submitDisabled,
           mt: 40,
