@@ -9,7 +9,7 @@ import isEmpty from 'lodash/isEmpty';
 // components
 import Wallet from '../components/Wallet';
 import FractionateForm from '../components/FractionateForm';
-import AuctionDisplay from '../components/AuctionDisplay';
+import AuctionListDisplay from '../components/AuctionListDisplay';
 import Tabs from '../components/Tabs';
 
 // utils
@@ -76,16 +76,16 @@ const App = (props) => {
 
   let tabData = [
     {
+      title: "Auctions",
+      content: <AuctionListDisplay />,
+    },
+    {
       title: "Fractionate",
       content: isWalletConnected && <FractionateForm />
     },
     {
       title: "Sell",
       content: <Text textAlign="center">(╯°□°)╯︵ [AUCTION]</Text>,
-    },
-    {
-      title: "Auction",
-      content: <AuctionDisplay />,
     },
   ];
 
