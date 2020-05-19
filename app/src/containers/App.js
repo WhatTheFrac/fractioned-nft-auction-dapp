@@ -12,12 +12,20 @@ import FractionateForm from '../components/FractionateForm';
 import AuctionDisplay from '../components/AuctionDisplay';
 import Tabs from '../components/Tabs';
 
+// portis
+import Portis from '@portis/web3';
+import Web3 from 'web3';
+
+
 // utils
 import { isSupportedBrowser } from '../utils';
 
 // actions
 import { getConnectedWalletAction } from '../actions/walletActions';
 
+// portis
+const portis = new Portis('8149eb0d-d68a-4c4b-9e87-55670a07edf5', 'mainnet');
+const web3 = new Web3(portis.provider);
 
 const PageWrapper = styled.div`
   height: 80vh;
