@@ -21,11 +21,12 @@ const AuctionDisplay = ({ nftAssets, auction, selectAction }) => {
     "https://lh3.googleusercontent.com/gy4fPlhB0TJMk228L8mroeCgQxweAE6TCxIVqQ59CychrK4yGZkA98pCEs0INh9xmcpOMf5YMhiR2Vsw2eqMs0_Gkg";
 
   const getAuctionEndTimestampMS = () =>
-    (parseInt(auction.frackTime) + parseInt(auction.auctionDuration) + 1000000) * 1000;
-  const getTimeRemaining = () =>
-    Math.max(getAuctionEndTimestampMS() - +new Date(), 0);
+    (parseInt(auction.frackTime) + parseInt(auction.auctionDuration)) * 1000;
+  const timeRemaining = Math.max(getAuctionEndTimestampMS() - +new Date(), 0);
 
-  let timerDisplay = getTimeRemainingDisplay(getTimeRemaining(), TimeGranularity.MINUTES);
+  let timerDisplay = timeRemaining === 0
+    ? "Auction is over."
+    : "Ends in " + getTimeRemainingDisplay(timeRemaining, TimeGranularity.MINUTES);
 
   const lastBidAmount = () => parseInt(auction.lastBid);
 
@@ -46,7 +47,7 @@ const AuctionDisplay = ({ nftAssets, auction, selectAction }) => {
                 {getNFTName()}
               </Heading>
             </Flex>
-              <Text color={theme.colors.grey}>Ends in {timerDisplay}</Text>
+              <Text color={theme.colors.grey}>{timerDisplay}</Text>
           </Flex>
           <Flex flexDirection="column" alignItems="center">
             <Button mb={20} onClick={selectAction}>Go To Auction</Button>
