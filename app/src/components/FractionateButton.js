@@ -4,6 +4,7 @@ import { Eth } from '@rimble/icons';
 import PropTypes from 'prop-types';
 import isEmpty from 'lodash/isEmpty';
 import { connect } from 'react-redux';
+import moment from 'moment';
 
 // actions
 import { fractionateTransactionAction } from '../actions/transactionActions';
@@ -22,6 +23,7 @@ import FractionateFailureDialog from './FractionateFailureDialog';
 
 // utils
 import {
+  createTokenSymbol,
   getTransactionDetailsLink,
   isCaseInsensitiveEqual,
   ExplanationString,
@@ -36,7 +38,12 @@ const FractionateButton = ({
   waitingForTransactionSubmit,
   networkId,
   selectedNft,
-  nftTokenAmount,
+  nftTokenSupplyAmount,
+  nftTokenSellAmount,
+  nftEstimatedValue,
+  minBid,
+  minBidIncrease,
+  auctionDurationSeconds,
   nftTokenSellAmount,
   minBid,
   minBidIncrease,
@@ -69,7 +76,6 @@ const FractionateButton = ({
       -> transactionSuccess()
       -> success dialog shows [this modal replaced by success modal]
     4. user closes dialog
-
     TODO handle failure
   */
   const [isOpen, setIsOpen] = useState(false);
@@ -78,7 +84,6 @@ const FractionateButton = ({
   const [showFailureDialog, setShowFailureDialog] = useState(false);
 
 
-  // TODO: change to fractionalize transaction type
   const transaction = transactions.find(
     ({ type, from }) => type === TRANSACTION_TYPE.FRACTIONATE
       && isCaseInsensitiveEqual(from, connectedWalletAddress)
@@ -92,15 +97,18 @@ const FractionateButton = ({
 
   const userFractionateConfirm = (e) => {
     e.preventDefault();
-    // TODO: change to fractionalize transaction action with its param
-    fractionateTransaction();
-  };
-
-  // TODO call this when the transaction actually succeeds
-  const openSuccessDialog = (e) => {
-    e.preventDefault();
-    setShowSuccessDialog(true);
-    closeModal(e);
+    const { tokenAddress, tokenId, title } = selectedNft;
+    fractionateTransaction(
+      tokenAddress,
+      tokenId,
+      title,
+      nftTokenSupplyAmount,
+      nftTokenSellAmount,
+      nftEstimatedValue,
+      minBid,
+      minBidIncrease,
+      auctionDurationSeconds,
+    );
   };
 
   const closeSuccessDialog = () => {
@@ -155,155 +163,168 @@ const FractionateButton = ({
   );
 
   const { tokenAddress, title: nftTitle } = selectedNft;
+  const putForSale = nftTokenSellAmount !== 0;
+  const durationDisplayValue = `${moment.duration(auctionDurationSeconds, 'seconds').days()} day(s)`;
+  const durationDeadlineDisplayValue = `Auction will end on ${moment().add('seconds', auctionDurationSeconds).format('YYYY-MM-DD [at] HH:mm')}`;
 
   return (
     <>
       <Button onClick={openModal} {...buttonProps || []}>Fractionate</Button>
-      <Modal isOpen={isOpen}>
-        <Card borderRadius={1} p={0} width={600}>
-          <Flex
-            justifyContent="space-between"
-            alignItems="center"
-            borderBottom={1}
-            borderColor="near-white"
-            p={[3, 4]}
-          >
-            <Flex onClick={openSuccessDialog}>
-              <Eth color="primary" size="40" />
-            </Flex>
-            <Flex onClick={openFailureDialog}>
-              <Heading textAlign="center" as="h1" fontSize={[2, 3]} px={[3, 0]}>
-                Fractionate Transaction
-              </Heading>
-            </Flex>
-            <Link onClick={closeModal}>
-              <Icon name="Close" color="moon-gray" aria-label="Close" />
-            </Link>
-          </Flex>
-          <Box p={[3, 4]}>
-            <Flex justifyContent={"space-between"} flexDirection={"column"}>
-              {isEmpty(transaction) && (
-                <Text textAlign="center">
-                  Please look over the details of your Fractionalization – this can't be undone!
-                </Text>
-              )}
-              <Flex
-                alignItems={"stretch"}
-                flexDirection={"column"}
-                borderRadius={2}
-                borderColor={"moon-gray"}
-                borderWidth={1}
-                borderStyle={"solid"}
-                overflow={"hidden"}
-                my={[3, 4]}
-              >
-                {waitingForTransactionSubmit && metamaskConfirmIndicator}
-                {!isEmpty(transaction) && (
-                  <Flex
-                    bg="primary"
-                    p={3}
-                    borderBottom={"1px solid gray"}
-                    borderColor={"moon-gray"}
-                    alignItems={"center"}
-                    justifyContent={"space-between"}
-                    flexDirection={["column", "row"]}
-                  >
-                    <Box>
-                      <Text
-                        textAlign={["center", "left"]}
-                        color="near-white"
-                        my={[1, 0]}
-                        fontSize={3}
-                        lineHeight={"1.25em"}
-                      >
-                        {transaction.status === STATUS_PENDING ? 'Waiting for confirmation...' : 'Transaction confirmed'}
-                      </Text>
-                    </Box>
-
-                    <Box>
-                      <Flex flexDirection="row" alignItems="center">
-                        <Link
-                          color="near-white"
-                          ml={[0, 3]}
-                          fontSize={1}
-                          lineHeight={"1.25em"}
-                          target="_blank"
-                          href={getTransactionDetailsLink(transaction.hash, networkId)}
-                        >
-                          Transaction details
-                          <Icon
-                            ml={1}
-                            color="near-white"
-                            name="Launch"
-                            size="14px"
-                          />
-                        </Link>
-                      </Flex>
-                    </Box>
-                  </Flex>
-                )}
-                <FractionateModalInfoRow
-                  title="NFT to deposit"
-                  description={ExplanationString.depositNftExplanation}
-                  data={nftTitle}
-                  secondaryData={tokenAddress}
-                />
-                <FractionateModalInfoRow
-                  title="Number of NFT shares to receive"
-                  description={ExplanationString.mintFractionExplanation}
-                  data={`${nftTokenAmount} shares`}
-                  secondaryData={`of ${nftTitle}`}
-                />
-                <FractionateModalInfoRow
-                  title="Number of NFT shares to sell"
-                  description={ExplanationString.sellFractionExplanation}
-                  data={`${nftTokenSellAmount} shares`}
-                  secondaryData={`of ${nftTitle}`}
-                />
-                <FractionateModalInfoRow
-                  title="Auction Bid Settings"
-                  description={ExplanationString.auctionExplanation}
-                  data={`Min bid: ${minBid} shares`}
-                  secondaryData={`Min bid increase: ${minBidIncrease}%`}
-                />
-                <FractionateModalInfoRow
-                  title="Auction Duration"
-                  description={ExplanationString.auctionDurationExplanation}
-                  data={`${auctionDurationSeconds} seconds`}
-                />
-                {/*<FractionateModalInfoRow*/}
-                {/*  title="DAI to deposit"*/}
-                {/*  description="In order for people to purchase fractions of this NFT, this DAI will be sent to the balancer pool along with the NFT tokens."*/}
-                {/*  data="1,000 DAI"*/}
-                {/*  secondaryData="approximately $1,000"*/}
-                {/*/>*/}
-                {/*<FractionateModalInfoRow*/}
-                {/*  title="Transaction Fee"*/}
-                {/*  description="Pays the Ethereum network to process your transaction. Spent even if the transaction fails."*/}
-                {/*  data="0.02 Eth"*/}
-                {/*  secondaryData="$0.18"*/}
-                {/*/>*/}
-                {/*<FractionateModalInfoRow*/}
-                {/*  title="Estimated Time"*/}
-                {/*  description="Commiting changes to the blockchain requires time for your transaction to be mined."*/}
-                {/*  data={estimatedTimeForDisplay()}*/}
-                {/*/>*/}
+      {!isEmpty(selectedNft) && (
+        <Modal isOpen={isOpen}>
+          <Card borderRadius={1} p={0} width={600}>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              borderBottom={1}
+              borderColor="near-white"
+              p={[3, 4]}
+            >
+              <Flex>
+                <Eth color="primary" size="40" />
               </Flex>
-              <Flex justifyContent="flex-end">
-                <Button.Outline onClick={closeModal} mr={1}>Wait! Go back.</Button.Outline>
+              <Flex onClick={openFailureDialog}>
+                <Heading textAlign="center" as="h1" fontSize={[2, 3]} px={[3, 0]}>
+                  Fractionate Transaction
+                </Heading>
+              </Flex>
+              <Link onClick={closeModal}>
+                <Icon name="Close" color="moon-gray" aria-label="Close" />
+              </Link>
+            </Flex>
+            <Box p={[3, 4]}>
+              <Flex justifyContent={"space-between"} flexDirection={"column"}>
                 {isEmpty(transaction) && (
-                  <Button
-                    onClick={userFractionateConfirm}
-                    disabled={!!transactionInProgress}
-                  >
-                    Fractionate
-                  </Button>
+                  <Text textAlign="center">
+                    Please look over the details of your Fractionalization – this can't be undone!
+                  </Text>
                 )}
+                <Flex
+                  alignItems={"stretch"}
+                  flexDirection={"column"}
+                  borderRadius={2}
+                  borderColor={"moon-gray"}
+                  borderWidth={1}
+                  borderStyle={"solid"}
+                  overflow={"hidden"}
+                  my={[3, 4]}
+                >
+                  {waitingForTransactionSubmit && metamaskConfirmIndicator}
+                  {!isEmpty(transaction) && (
+                    <Flex
+                      bg="primary"
+                      p={3}
+                      borderBottom={"1px solid gray"}
+                      borderColor={"moon-gray"}
+                      alignItems={"center"}
+                      justifyContent={"space-between"}
+                      flexDirection={["column", "row"]}
+                    >
+                      <Box>
+                        <Text
+                          textAlign={["center", "left"]}
+                          color="near-white"
+                          my={[1, 0]}
+                          fontSize={3}
+                          lineHeight={"1.25em"}
+                        >
+                          {transaction.status === STATUS_PENDING ? 'Waiting for confirmation...' : 'Transaction confirmed'}
+                        </Text>
+                      </Box>
+                      <Box>
+                        <Flex flexDirection="row" alignItems="center">
+                          <Link
+                            color="near-white"
+                            ml={[0, 3]}
+                            fontSize={1}
+                            lineHeight={"1.25em"}
+                            target="_blank"
+                            href={getTransactionDetailsLink(transaction.hash, networkId)}
+                          >
+                            Transaction details
+                            <Icon
+                              ml={1}
+                              color="near-white"
+                              name="Launch"
+                              size="14px"
+                            />
+                          </Link>
+                        </Flex>
+                      </Box>
+                    </Flex>
+                  )}
+                  <FractionateModalInfoRow
+                    title="NFT to deposit"
+                    description={ExplanationString.depositNftExplanation}
+                    data={nftTitle}
+                    secondaryData={tokenAddress}
+                  />
+                  <FractionateModalInfoRow
+                    title="Number of NFT shares to receive"
+                    description={ExplanationString.mintFractionExplanation}
+                    data={`${nftTokenSupplyAmount} shares`}
+                    secondaryData={`of ${createTokenSymbol(nftTitle)} (${nftTitle})`}
+                  />
+                  {putForSale && (
+                    <FractionateModalInfoRow
+                      title="Number of NFT shares to sell"
+                      description="This is the number of shares that will be put on sale."
+                      data={`${nftTokenSellAmount} shares`}
+                      secondaryData={`${100 * nftTokenSellAmount / nftTokenSupplyAmount}% of ${nftTokenSupplyAmount}`}
+                    />
+                  )}
+                  {putForSale && (
+                    <FractionateModalInfoRow
+                      title="DAI to deposit"
+                      description="In order for people to purchase fractions of this NFT, this DAI will be sent to the balancer pool along with the NFT tokens."
+                      data={`${Number((nftEstimatedValue * 0.02).toFixed(18))} DAI`}
+                      secondaryData={`2% of token worth`}
+                    />
+                  )}
+                  {putForSale && (
+                    <FractionateModalInfoRow
+                      title="Auction Bid Settings"
+                      description={ExplanationString.auctionExplanation}
+                      data={`Min bid is ${Number(minBid.toFixed(18))} DAI`}
+                      secondaryData={`Min bid increase: ${minBidIncrease}%`}
+                    />
+                  )}
+                  {putForSale && (
+                    <FractionateModalInfoRow
+                      title="Auction duration"
+                      description={ExplanationString.auctionDurationExplanation}
+                      data={durationDisplayValue}
+                      secondaryData={durationDeadlineDisplayValue}
+                    />
+                  )}
+                  {/*<FractionateModalInfoRow*/}
+                  {/*  title="Transaction Fee"*/}
+                  {/*  description="Pays the Ethereum network to process your transaction. Spent even if the transaction fails."*/}
+                  {/*  data="0.02 Eth"*/}
+                  {/*  secondaryData="$0.18"*/}
+                  {/*/>*/}
+                  {/*<FractionateModalInfoRow*/}
+                  {/*  title="Estimated Time"*/}
+                  {/*  description="Commiting changes to the blockchain requires time for your transaction to be mined."*/}
+                  {/*  data={estimatedTimeForDisplay()}*/}
+                  {/*/>*/}
+                </Flex>
+                <Flex justifyContent="flex-end">
+                  <Button.Outline onClick={closeModal} mr={1}>Close</Button.Outline>
+                  {isEmpty(transaction) && (
+                    <Button
+                      onClick={userFractionateConfirm}
+                      disabled={!!transactionInProgress}
+                    >
+                      Fractionate
+                    </Button>
+                  )}
+                </Flex>
               </Flex>
-            </Flex>
-          </Box>
-        </Card>
-      </Modal>
+            </Box>
+          </Card>
+        </Modal>
+      )}
       <FractionateSuccessDialog isOpen={showSuccessDialog} closeHook={closeSuccessDialog} />
       <FractionateFailureDialog isOpen={showFailureDialog} closeHook={closeFailureDialog} />
     </>
@@ -318,7 +339,12 @@ FractionateButton.propTypes = {
   waitingForTransactionSubmit: PropTypes.bool,
   networkId: PropTypes.number,
   selectedNft: PropTypes.object,
-  nftTokenAmount: PropTypes.number,
+  nftTokenSupplyAmount: PropTypes.number,
+  nftTokenSellAmount: PropTypes.number,
+  nftEstimatedValue: PropTypes.number,
+  minBid: PropTypes.number,
+  minBidIncrease: PropTypes.number,
+  auctionDurationSeconds: PropTypes.number,
   nftTokenSellAmount: PropTypes.number,
   minBid: PropTypes.number,
   minBidIncrease: PropTypes.number,

@@ -104,6 +104,13 @@ export const getEtherscanHostname = (networkId) => ` https://${networkId === 1 ?
 
 export const getTransactionDetailsLink = (hash, networkId) => `${getEtherscanHostname(networkId)}/tx/${hash}`;
 
+export const createTokenSymbol = (title) => title
+  .trim()
+  .split(' ')
+  .map((word) => word.charAt(0))
+  .join('')
+  .toUpperCase();
+
 export const AuctionState = {
   // auction running states
   NO_BIDS: 'no_bids',

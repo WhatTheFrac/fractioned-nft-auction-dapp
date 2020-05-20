@@ -4,9 +4,5 @@
   "main": "index.js",
   "repository": "https://github.com/WhatTheFrac/fractioned-nft-auction-dapp.git",
   "author": "What The Frac",
-  "license": " ",
-  "dependencies": {
-    "axios": "^0.19.2",
-    "lodash": "^4.17.15"
-  }
+  "license": " "
 }
