@@ -37,6 +37,7 @@ import {
   getFrackerContractAddress,
   getTokenAllowance,
   parseNumberInputValue,
+  ExplanationString,
 } from '../utils';
 
 
@@ -197,7 +198,7 @@ const FractionateForm = ({
   return (
     <Flex flexDirection="column" justifyContent="center" alignItems="center" pb={80}>
       <FormWrapper>
-        {renderHeading("Deposit NFT")}
+        {renderHeading("Deposit NFT", ExplanationString.depositNftExplanation)}
         <InputWrapper mt={3}>
           <Flex flexWrap="wrap" width="100%">
             <Field label="NFT" style={{ flex: 0.52 }}>
@@ -222,7 +223,7 @@ const FractionateForm = ({
         </InputWrapper>
         {!isEmpty(selectedNft) && (
           <>
-            {renderHeading("Mint Fraction Tokens")}
+            {renderHeading("Mint Fraction Tokens", ExplanationString.mintFractionExplanation)}
             <InputWrapper mt={3}>
               <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
                 <Field label="How many NFT tokens would you like to create?" style={{ flex: 0.3 }}>
@@ -250,7 +251,7 @@ const FractionateForm = ({
               {/*  Unconfirmed*/}
               {/*</StatusText>*/}
             </InputWrapper>
-            {renderHeading("Sell Fraction Tokens")}
+            {renderHeading("Sell Fraction Tokens", ExplanationString.sellFractionExplanation)}
             <InputWrapper mt={3}>
               <Flex alignItems="flex-end" width="100%">
                 <Field label="What portion would you like to sell?" style={{ flex: 0.2 }}>
@@ -315,7 +316,7 @@ const FractionateForm = ({
         )}
         {putForSale && !!daiUnlocked && (
           <>
-            {renderHeading("Provide Auction Details")}
+            {renderHeading("Provide Auction Details", ExplanationString.auctionExplanation)}
               <InputWrapper mt={3}>
                 <Flex flexWrap="wrap" width="100%">
                   <Field label="Minimum bid in DAI" pr={16} style={{ flex: 0.33 }}>

@@ -13,7 +13,7 @@ import {
 import PropTypes from "prop-types";
 
 // utils
-import { parseNumberInputValue, AuctionState } from "../utils";
+import { parseNumberInputValue, AuctionState, getTimeRemainingDisplay, TimeGranularity } from "../utils";
 import { theme } from "rimble-ui";
 
 const hr = styled.span`
@@ -34,24 +34,7 @@ const AuctionBidDisplay = ({
 
   const minimumBidDisplay = "Minimum bid: " + minBid + " Dai";
 
-  let days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
-  let hours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
-  let minutes = Math.floor((timeRemaining / 1000 / 60) % 60);
-  let seconds = Math.floor((timeRemaining / 1000) % 60);
-  let timeLeft =
-    days > 0
-      ? days === 1
-        ? { day: days, hours: hours }
-        : { days: days, hours: hours }
-      : { hours: hours, minutes: minutes, seconds: seconds };
-
-  let timerDisplay = "";
-  Object.keys(timeLeft).forEach((interval) => {
-    if (!timeLeft[interval]) return;
-    timerDisplay = timerDisplay.concat(
-      " " + timeLeft[interval] + " " + interval
-    );
-  });
+  let timerDisplay = getTimeRemainingDisplay(timeRemaining, TimeGranularity.SECONDS);
 
   let bidStatusText = null;
   switch(auctionState) {

@@ -1,0 +1,16 @@
+type FrackedERC721 @entity {
+  id: ID!
+  nftContract: Bytes!
+  nftId: BigInt!
+  nftReceiver: Bytes!
+  fracker: Bytes!
+  frackTime: BigInt!
+  token: Bytes!
+  balancerPool: Bytes!
+  balancerFlipDuration: BigInt!
+  minAuctionBid: BigInt!
+  minBidIncrease: BigInt!
+  auctionDuration: BigInt!
+  lastBidder: Bytes!
+  lastBid: BigInt!
+}

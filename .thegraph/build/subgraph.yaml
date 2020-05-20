@@ -1,0 +1,35 @@
+specVersion: 0.0.2
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Fracker
+    network: rinkeby
+    source:
+      address: "0x7c2ea0a6a7EbF1507F5296a9dbA388f3cE9a7448"
+      abi: Contract
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - BalancerPoked
+        - BidReceived
+        - ProceedsClaimed
+        - Settled
+        - TokenFracked
+      abis:
+        - name: Contract
+          file: Fracker/abis/Fracker.json
+      eventHandlers:
+        - event: BalancerPoked(indexed address,indexed uint256,uint256,uint256)
+          handler: handleBalancerPoked
+        - event: BidReceived(indexed address,indexed address,indexed uint256,uint256)
+          handler: handleBidReceived
+        - event: ProceedsClaimed(indexed address,indexed address,indexed uint256)
+          handler: handleProceedsClaimed
+        - event: Settled(indexed address,indexed uint256,uint256)
+          handler: handleSettled
+        - event: TokenFracked(indexed address,indexed address,indexed uint256)
+          handler: handleTokenFracked
+      file: Fracker/Fracker.wasm

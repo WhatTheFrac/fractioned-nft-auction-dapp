@@ -8,7 +8,7 @@ import AuctionBidDisplay from "./AuctionBidDisplay";
 import AuctionCompleteDisplay from "./AuctionCompleteDisplay";
 
 // utils
-import { AuctionState } from "../utils";
+import { AuctionState, EMPTY_ADDRESS } from "../utils";
 
 const NFTHero = styled(Card)`
   position: relative;
@@ -25,27 +25,48 @@ const Centered = styled.div`
   transform: translate(-50%, -50%);
 `;
 
-const AuctionDisplay = ({ nftAssets }) => {
+const AuctionDisplay = ({ nftAssets, auction }) => {
   // TODO implement these data/action functions
   const handleBidSubmit = (bid) => alert("Bid button clicked with bid: " + bid);
   const handleClaimNFT = () => alert("claim nft button clicked");
   const handleClaimWinnings = () => alert("claim winnings button clicked");
-  const getCurrentBid = () => "359.43";
-  const getMinimumBid = () => "382.89";
-  const getAuctionEndTimestampMS = () => 1590080286692;
-  const getNFTName = () => "Planet 239479";
 
-  // TODO returns true if the auction is not complete AND the following is true for the user
-  const isUserHighestBidder = () => false;
-  const isExistingBids = () => getCurrentBid() > 0;
-
-  // TODO returns true if the auction is complete AND the following is true for the user
-  const isUserNFTWinner = () => false;
-  const isUserReturnsWinner = () => false;
-
+  const getCurrentBid = () => parseInt(auction.lastBid);
+  const getMinimumBid = () => {
+    if (auction.lastBidder === EMPTY_ADDRESS) {
+      return parseInt(auction.minAuctionBid);
+    } else {
+      return auction.lastBid * (1 + (parseInt(auction.minBidIncrease)/100))
+    }
+  }
+  const getAuctionEndTimestampMS = () =>
+    (parseInt(auction.frackTime) + parseInt(auction.auctionDuration) + 1000000) * 1000;
   const getTimeRemaining = () =>
     Math.max(getAuctionEndTimestampMS() - +new Date(), 0);
-  const isAuctionComplete = () => getAuctionEndTimestampMS() - +new Date() < 0;
+  const isAuctionComplete = () => getTimeRemaining() === 0;
+
+  // TODO
+  const getNFTName = () => "Planet 239479";
+  // TODO returns true if the auction is not complete AND the following is true for the user
+  const isExistingBids = () => getCurrentBid() > 0;
+  const isUserHighestBidder = () => {
+    return isExistingBids()
+      ? false // TODO replace with actual logic with wallet public address
+      : false;
+
+  }
+  // TODO returns true if the auction is complete AND the following is true for the user
+  const isUserNFTWinner = () => {
+    return isAuctionComplete()
+      ? false // TODO replace with actual logic, just need the user's public address
+      : false;
+  }
+  const isUserReturnsWinner = () =>  {
+    return isAuctionComplete()
+      ? false // TODO replace with actual logic, just need the user's public address
+      : false;
+
+  }
 
   const getAuctionState = () => {
     if (!isAuctionComplete()) {
@@ -62,7 +83,7 @@ const AuctionDisplay = ({ nftAssets }) => {
   const [auctionIsComplete, setAuctionIsComplete] = useState(
     isAuctionComplete()
   );
-  const [timeRemaining, setTimeRemaining] = useState(isAuctionComplete());
+  const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining());
 
   useEffect(() => {
     setTimeout(() => {
@@ -113,6 +134,7 @@ const AuctionDisplay = ({ nftAssets }) => {
 
 AuctionDisplay.propTypes = {
   nftAssets: PropTypes.array,
+  auction: PropTypes.object,
 };
 
 const mapStateToProps = ({ wallet: { nftAssets } }) => ({

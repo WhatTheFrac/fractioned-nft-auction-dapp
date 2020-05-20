@@ -26,6 +26,7 @@ import {
   createTokenSymbol,
   getTransactionDetailsLink,
   isCaseInsensitiveEqual,
+  ExplanationString,
 } from '../utils';
 
 
@@ -40,6 +41,10 @@ const FractionateButton = ({
   nftTokenSupplyAmount,
   nftTokenSellAmount,
   nftEstimatedValue,
+  minBid,
+  minBidIncrease,
+  auctionDurationSeconds,
+  nftTokenSellAmount,
   minBid,
   minBidIncrease,
   auctionDurationSeconds,
@@ -226,7 +231,6 @@ const FractionateButton = ({
                           {transaction.status === STATUS_PENDING ? 'Waiting for confirmation...' : 'Transaction confirmed'}
                         </Text>
                       </Box>
-
                       <Box>
                         <Flex flexDirection="row" alignItems="center">
                           <Link
@@ -251,13 +255,13 @@ const FractionateButton = ({
                   )}
                   <FractionateModalInfoRow
                     title="NFT to deposit"
-                    description="This is the NFT for which this protocol will create fractional shares."
+                    description={ExplanationString.depositNftExplanation}
                     data={nftTitle}
                     secondaryData={tokenAddress}
                   />
                   <FractionateModalInfoRow
                     title="Number of NFT shares to receive"
-                    description="This is the number of shares that will be created for your NFT."
+                    description={ExplanationString.mintFractionExplanation}
                     data={`${nftTokenSupplyAmount} shares`}
                     secondaryData={`of ${createTokenSymbol(nftTitle)} (${nftTitle})`}
                   />
@@ -279,22 +283,16 @@ const FractionateButton = ({
                   )}
                   {putForSale && (
                     <FractionateModalInfoRow
-                      title="Minimum bid"
-                      description="Minimum bid for your NFT in auction."
-                      data={`${Number(minBid.toFixed(18))} DAI`}
-                    />
-                  )}
-                  {putForSale && (
-                    <FractionateModalInfoRow
-                      title="Minimum bid increase"
-                      description="Minimum bid increase percentage for your NFT in auction."
-                      data={`${minBidIncrease} %`}
+                      title="Auction Bid Settings"
+                      description={ExplanationString.auctionExplanation}
+                      data={`Min bid is ${Number(minBid.toFixed(18))} DAI`}
+                      secondaryData={`Min bid increase: ${minBidIncrease}%`}
                     />
                   )}
                   {putForSale && (
                     <FractionateModalInfoRow
                       title="Auction duration"
-                      description="Time span that your auction will be open for."
+                      description={ExplanationString.auctionDurationExplanation}
                       data={durationDisplayValue}
                       secondaryData={durationDeadlineDisplayValue}
                     />
@@ -344,6 +342,10 @@ FractionateButton.propTypes = {
   nftTokenSupplyAmount: PropTypes.number,
   nftTokenSellAmount: PropTypes.number,
   nftEstimatedValue: PropTypes.number,
+  minBid: PropTypes.number,
+  minBidIncrease: PropTypes.number,
+  auctionDurationSeconds: PropTypes.number,
+  nftTokenSellAmount: PropTypes.number,
   minBid: PropTypes.number,
   minBidIncrease: PropTypes.number,
   auctionDurationSeconds: PropTypes.number,

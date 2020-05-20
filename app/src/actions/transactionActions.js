@@ -3,6 +3,7 @@ import get from 'lodash/get';
 // constants
 import {
   ADD_TRANSACTION,
+  ADD_ALL_FRAC,
   SET_TRANSACTION_CONFIRMED,
   STATUS_PENDING,
   TRANSACTION_TYPE,
@@ -11,6 +12,8 @@ import {
 
 // assets
 import frackerAbi from '../assets/abi/fracker.json';
+
+import { loadAllFrac } from '../services/contracts';
 
 // utils
 import {
@@ -22,6 +25,13 @@ import {
   isCaseInsensitiveEqual,
 } from '../utils';
 
+export const getLoadAllFracAction = () => async (dispatch, getState) => {
+  const allFrac = await loadAllFrac();
+  dispatch({
+    type: ADD_ALL_FRAC,
+    payload: allFrac,
+  });
+};
 
 export const approveTokenTransactionAction = (amount, address) => async (dispatch, getState) => {
   const { wallet: { connected: connectedWallet } } = getState();
