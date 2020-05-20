@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import ConnectionBanner from '@rimble/connection-banner';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Loader, Box, Flex, Text, Flash } from 'rimble-ui';
+import { Loader, Box, Flex, Flash } from 'rimble-ui';
 import isEmpty from 'lodash/isEmpty';
 
 // components
@@ -17,6 +17,7 @@ import { isSupportedBrowser } from '../utils';
 
 // actions
 import { getConnectedWalletAction } from '../actions/walletActions';
+import { getLoadAllFracAction } from '../actions/transactionActions';
 
 
 const PageWrapper = styled.div`
@@ -44,13 +45,14 @@ const TopRight = styled.div`
 const CONTENT_WIDTH = 700;
 
 const App = (props) => {
-  const { getConnectedWallet, connectedWallet } = props;
+  const { getConnectedWallet, connectedWallet, loadAllFrac, allFracExisting } = props;
 
   const [appLoading, setAppLoading] = useState(true);
 
   useEffect(() => {
     if (appLoading) {
       getConnectedWallet();
+      loadAllFrac();
       setAppLoading(false);
     }
     if (window.ethereum) {
@@ -80,12 +82,8 @@ const App = (props) => {
       content: isWalletConnected && <FractionateForm />
     },
     {
-      title: "Sell",
-      content: <Text textAlign="center">(╯°□°)╯︵ [AUCTION]</Text>,
-    },
-    {
       title: "Auctions",
-      content: <AuctionListDisplay />,
+      content: <AuctionListDisplay allFracExisting={allFracExisting} />,
     },
   ];
 
@@ -112,16 +110,21 @@ const App = (props) => {
 App.propTypes = {
   getConnectedWallet: PropTypes.func,
   connectedWallet: PropTypes.object,
+  loadAllFrac: PropTypes.func,
+  allFracExisting: PropTypes.any,
 };
 
 const mapStateToProps = ({
   wallet: { connected: connectedWallet },
+  transactions: { allFrac: allFracExisting },
 }) => ({
   connectedWallet,
+  allFracExisting,
 });
 
 const mapDispatchToProps = {
   getConnectedWallet: getConnectedWalletAction,
+  loadAllFrac: getLoadAllFracAction,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App)

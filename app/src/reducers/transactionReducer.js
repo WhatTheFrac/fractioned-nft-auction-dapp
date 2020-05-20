@@ -1,5 +1,6 @@
 // constants
 import {
+  ADD_ALL_FRAC,
   ADD_TRANSACTION,
   SET_TRANSACTION_CONFIRMED,
   STATUS_CONFIRMED,
@@ -13,10 +14,13 @@ import { isCaseInsensitiveEqual } from '../utils';
 const initialState = {
   data: [],
   waitingForSubmit: false,
+  allFrac: [],
 };
 
 const collectiblesReducer = (state = initialState, action) => {
   switch (action.type) {
+    case ADD_ALL_FRAC:
+      return { ...state, allFrac: action.payload };
     case SET_WAITING_FOR_TRANSACTION_SUBMIT:
       return { ...state, waitingForSubmit: true };
     case ADD_TRANSACTION:

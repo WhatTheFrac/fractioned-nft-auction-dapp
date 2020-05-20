@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import styled from "styled-components";
-import { Avatar, Button, Text, Link, Card, Flex, Heading } from "rimble-ui";
+import { Avatar, Button, Text, Card, Flex, Heading } from "rimble-ui";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
-import AuctionBidDisplay from "./AuctionBidDisplay";
-import AuctionCompleteDisplay from "./AuctionCompleteDisplay";
 import { theme } from "rimble-ui";
 
 // utils
-import { AuctionState } from "../utils";
+import { getTimeRemainingDisplay, TimeGranularity } from "../utils";
 
 const ListItem = styled(Card)`
   position: relative;
@@ -17,23 +15,30 @@ const ListItem = styled(Card)`
   margin-bottom: 20px;
 `;
 
-const AuctionDisplay = ({ nftAssets, auctionAddress, selectAction }) => {
+const AuctionDisplay = ({ nftAssets, auction, selectAction }) => {
   const getNFTName = () => "Kitties 98524";
   const getNFTImageURL = () =>
     "https://lh3.googleusercontent.com/gy4fPlhB0TJMk228L8mroeCgQxweAE6TCxIVqQ59CychrK4yGZkA98pCEs0INh9xmcpOMf5YMhiR2Vsw2eqMs0_Gkg";
-  const auctionEndDisplay = () => "Auction ends in 1 day and 4 hours";
-  const lastBidAmount = () => "18 DAI";
 
-  const NFT_SIZE = 80;
+  const getAuctionEndTimestampMS = () =>
+    (parseInt(auction.frackTime) + parseInt(auction.auctionDuration) + 1000000) * 1000;
+  const getTimeRemaining = () =>
+    Math.max(getAuctionEndTimestampMS() - +new Date(), 0);
+
+  let timerDisplay = getTimeRemainingDisplay(getTimeRemaining(), TimeGranularity.MINUTES);
+
+  const lastBidAmount = () => parseInt(auction.lastBid);
+
+  const NFT_DISPLAY_SIZE = 80;
 
   return (
       <ListItem>
-        <Flex justifyContent="space-between" alignItems="center" onClick={selectAction}>
+        <Flex justifyContent="space-between" alignItems="center">
           <Flex flexDirection="column">
-            <Flex alignItems="center">
-              <div style={{ width: NFT_SIZE, height: NFT_SIZE }}>
+            <Flex alignItems="center" mb={10}>
+              <div style={{ width: NFT_DISPLAY_SIZE, height: NFT_DISPLAY_SIZE, boxShadow: "0px 0px 10px #888888" }}>
                 <Avatar
-                  size={NFT_SIZE+"px"}
+                  size={NFT_DISPLAY_SIZE+"px"}
                   src={getNFTImageURL()}
                 />
               </div>
@@ -41,11 +46,11 @@ const AuctionDisplay = ({ nftAssets, auctionAddress, selectAction }) => {
                 {getNFTName()}
               </Heading>
             </Flex>
-            <Text color={theme.colors.grey}>{auctionEndDisplay()}</Text>
+              <Text color={theme.colors.grey}>Ends in {timerDisplay}</Text>
           </Flex>
-          <Flex flexDirection="column">
+          <Flex flexDirection="column" alignItems="center">
             <Button mb={20} onClick={selectAction}>Go To Auction</Button>
-            <Text color={theme.colors.grey}>Last bid: {lastBidAmount()}</Text>
+            <Text color={theme.colors.grey}>Current bid: {lastBidAmount()}</Text>
           </Flex>
         </Flex>
       </ListItem>
@@ -54,7 +59,7 @@ const AuctionDisplay = ({ nftAssets, auctionAddress, selectAction }) => {
 
 AuctionDisplay.propTypes = {
   nftAssets: PropTypes.array,
-  auctionAddress: PropTypes.string,
+  auction: PropTypes.any,
   selectAction: PropTypes.func,
 };
 

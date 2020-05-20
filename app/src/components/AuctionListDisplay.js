@@ -1,25 +1,20 @@
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import { Avatar, Button, Card, Flex, Heading, Text } from "rimble-ui";
+import React, { useState } from "react";
+import { Button } from "rimble-ui";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
 import AuctionDisplay from "./AuctionDisplay";
 import AuctionListDisplayRow from "./AuctionListDisplayRow";
 
-// utils
-import { AuctionState } from "../utils";
+const NO_AUCTION = -1;
 
-const AuctionListDisplay = ({ nftAssets }) => {
-  const [selectedAuctionAddress, setSelectedAuctionAddress] = useState('');
+const AuctionListDisplay = ({ nftAssets, allFracExisting }) => {
+  const [selectedAuctionID, setSelectedAuctionID] = useState(NO_AUCTION);
 
-  const onClickAuction = (auctionAddress) => {
-    setSelectedAuctionAddress(auctionAddress);
-  }
-  const unselectAuction = () => setSelectedAuctionAddress('');
+  const onClickAuction = (id) => setSelectedAuctionID(id);
+  const unselectAuction = () => setSelectedAuctionID(NO_AUCTION);
 
-
-  if (selectedAuctionAddress !== "") {
+  if (selectedAuctionID !== NO_AUCTION) {
     return (
       <>
         <Button.Outline
@@ -28,20 +23,20 @@ const AuctionListDisplay = ({ nftAssets }) => {
           mb={20}>
           {"< Go Back"}
         </Button.Outline>
-        <AuctionDisplay auctionAddress={selectedAuctionAddress} />
+        <AuctionDisplay auction={allFracExisting[selectedAuctionID]} />
       </>
     )
   }
 
-  let auctions = [];
-  for (let i = 0; i < 10; i++) {
-    auctions.push(
-      <AuctionListDisplayRow
-        selectAction={() => onClickAuction("fake auction address" + i)}
-        auctionAddress={i.toString()}
-      />
-    )
-  }
+  let auctions = allFracExisting.map((auction, key) =>
+    <AuctionListDisplayRow
+      key={key}
+      selectAction={() => onClickAuction(key)}
+      auction={auction}
+      nftAssets={nftAssets}
+    />
+  );
+
   return (
     <>
       {auctions}
@@ -51,6 +46,7 @@ const AuctionListDisplay = ({ nftAssets }) => {
 
 AuctionListDisplay.propTypes = {
   nftAssets: PropTypes.array,
+  allFracExisting: PropTypes.any.isRequired,
 };
 
 const mapStateToProps = ({ wallet: { nftAssets } }) => ({

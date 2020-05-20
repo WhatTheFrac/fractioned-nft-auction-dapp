@@ -126,30 +126,6 @@ const FractionateForm = ({
   const [unlockedDaiAmount, setUnlockedDaiAmount] = useState(0);
   const [gettingDaiAllowance, setGettingDaiAllowance] = useState(false);
 
-  console.log({
-    minBid: minBid,
-    minBidIncrease: minBidIncrease,
-    auctionDurationSeconds: auctionDurationSeconds,
-  });
-
-  const DEPOSIT_NFT_EXPLANATION =
-    "The NFT that you would like to create fractional shares for, and sell in an auction.";
-
-  const DAI_ALLOWANCE_EXPLANATION =
-    "In order to sell your fractional tokens in the balancer pool, "
-    + "you need to seed the pool with dai liquidity.";
-
-  const MINT_FRACTION_EXPLANATION =
-    "This is the number of fractional tokens you would like to create, "
-    + "these will represent ownership of the token and holders will get a proportional "
-    + "fraction of the auction proceeds.";
-
-  const SELL_FRACTION_EXPLANATION =
-    "The number of the newly created fractional tokens you would like to distribute through the Balancer pool.";
-
-  const AUCTION_EXPLANATION =
-    "Details of the auction in which this NFT is sold and you get your share of the proceeds.";
-
   useEffect(() => {
     if (!gettingDaiAllowance) {
       setGettingDaiAllowance(true);
