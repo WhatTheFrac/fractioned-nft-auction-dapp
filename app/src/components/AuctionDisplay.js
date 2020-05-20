@@ -25,8 +25,8 @@ const Centered = styled.div`
   transform: translate(-50%, -50%);
 `;
 
-const AuctionDisplay = ({ nftAssets, auction }) => {
-  // TODO implement these data/action functions
+const AuctionDisplay = ({ nftAssets, auction, connectedWalletAddress }) => {
+  // TODO implement these data/action functions <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,
   const handleBidSubmit = (bid) => alert("Bid button clicked with bid: " + bid);
   const handleClaimNFT = () => alert("claim nft button clicked");
   const handleClaimWinnings = () => alert("claim winnings button clicked");
@@ -40,30 +40,27 @@ const AuctionDisplay = ({ nftAssets, auction }) => {
     }
   }
   const getAuctionEndTimestampMS = () =>
-    (parseInt(auction.frackTime) + parseInt(auction.auctionDuration) + 1000000) * 1000;
+    (parseInt(auction.frackTime) + parseInt(auction.auctionDuration)) * 1000;
   const getTimeRemaining = () =>
     Math.max(getAuctionEndTimestampMS() - +new Date(), 0);
   const isAuctionComplete = () => getTimeRemaining() === 0;
 
-  // TODO
+  // TODO <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
   const getNFTName = () => "Planet 239479";
-  // TODO returns true if the auction is not complete AND the following is true for the user
+  const getNFTImageURL = () => "https://lh3.googleusercontent.com/gy4fPlhB0TJMk228L8mroeCgQxweAE6TCxIVqQ59CychrK4yGZkA98pCEs0INh9xmcpOMf5YMhiR2Vsw2eqMs0_Gkg";
+
   const isExistingBids = () => getCurrentBid() > 0;
   const isUserHighestBidder = () => {
-    return isExistingBids()
-      ? false // TODO replace with actual logic with wallet public address
-      : false;
+    return isExistingBids() ? connectedWalletAddress === auction.lastBidder : false;
 
   }
-  // TODO returns true if the auction is complete AND the following is true for the user
-  const isUserNFTWinner = () => {
-    return isAuctionComplete()
-      ? false // TODO replace with actual logic, just need the user's public address
-      : false;
-  }
+  const isUserNFTWinner = () =>
+    isAuctionComplete() ? connectedWalletAddress === auction.lastBidder : false;
+
+  // TODO replace with actual logic <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
   const isUserReturnsWinner = () =>  {
     return isAuctionComplete()
-      ? false // TODO replace with actual logic, just need the user's public address
+      ? false
       : false;
 
   }
@@ -101,7 +98,7 @@ const AuctionDisplay = ({ nftAssets, auction }) => {
             <div style={{ width: 100, height: 100 }}>
               <Avatar
                 size="100px"
-                src="https://lh3.googleusercontent.com/gy4fPlhB0TJMk228L8mroeCgQxweAE6TCxIVqQ59CychrK4yGZkA98pCEs0INh9xmcpOMf5YMhiR2Vsw2eqMs0_Gkg"
+                src={getNFTImageURL()}
               />
             </div>
             <Heading as={"h1"} pl={20}>
@@ -135,6 +132,7 @@ const AuctionDisplay = ({ nftAssets, auction }) => {
 AuctionDisplay.propTypes = {
   nftAssets: PropTypes.array,
   auction: PropTypes.object,
+  connectedWalletAddress: PropTypes.string,
 };
 
 const mapStateToProps = ({ wallet: { nftAssets } }) => ({

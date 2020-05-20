@@ -8,7 +8,7 @@ import AuctionListDisplayRow from "./AuctionListDisplayRow";
 
 const NO_AUCTION = -1;
 
-const AuctionListDisplay = ({ nftAssets, allFracExisting }) => {
+const AuctionListDisplay = ({ nftAssets, allFracExisting, connectedWalletAddress }) => {
   const [selectedAuctionID, setSelectedAuctionID] = useState(NO_AUCTION);
 
   const onClickAuction = (id) => setSelectedAuctionID(id);
@@ -23,7 +23,10 @@ const AuctionListDisplay = ({ nftAssets, allFracExisting }) => {
           mb={20}>
           {"< Go Back"}
         </Button.Outline>
-        <AuctionDisplay auction={allFracExisting[selectedAuctionID]} />
+        <AuctionDisplay
+          auction={allFracExisting[selectedAuctionID]}
+          connectedWalletAddress={connectedWalletAddress}
+        />
       </>
     )
   }
@@ -37,20 +40,35 @@ const AuctionListDisplay = ({ nftAssets, allFracExisting }) => {
     />
   );
 
-  return (
-    <>
-      {auctions}
-    </>
-  );
+  return <>{auctions}</>;
 };
 
 AuctionListDisplay.propTypes = {
   nftAssets: PropTypes.array,
   allFracExisting: PropTypes.any.isRequired,
+  transactions: PropTypes.array,
+  balances: PropTypes.arrayOf(PropTypes.shape({
+    symbol: PropTypes.string,
+    balance: PropTypes.number,
+  })),
+  connectedWalletAddress: PropTypes.string,
+  networkId: PropTypes.number,
+  approveTokenTransaction: PropTypes.func,
 };
 
-const mapStateToProps = ({ wallet: { nftAssets } }) => ({
+const mapStateToProps = ({
+  wallet: {
+    nftAssets,
+    balances,
+    connected: { address: connectedWalletAddress, networkId },
+  },
+  transactions: { data: transactions },
+}) => ({
   nftAssets,
+  balances,
+  transactions,
+  connectedWalletAddress,
+  networkId,
 });
 
 export default connect(mapStateToProps)(AuctionListDisplay);
