@@ -1,0 +1,347 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_balancerFactory",
+        "type": "address"
+      },
+      { "internalType": "address", "name": "_DAI", "type": "address" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "poker",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "frackID",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newWeightA",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newWeightB",
+        "type": "uint256"
+      }
+    ],
+    "name": "BalancerPoked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "bidder",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "nftContract",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "frackID",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "BidReceived",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "caller",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "frackID",
+        "type": "uint256"
+      }
+    ],
+    "name": "ProceedsClaimed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "settler",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "frackID",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "winningBid",
+        "type": "uint256"
+      }
+    ],
+    "name": "Settled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "fracker",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "nftContract",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "frackID",
+        "type": "uint256"
+      }
+    ],
+    "name": "TokenFracked",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "BALANCER_100",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "BALANCER_2",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "BALANCER_98",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "CLAIM_FEE",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "DAI",
+    "outputs": [
+      { "internalType": "contract IERC20", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "balancerFactory",
+    "outputs": [
+      { "internalType": "contract IBFactory", "name": "", "type": "address" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_frackID", "type": "uint256" },
+      { "internalType": "uint256", "name": "_amount", "type": "uint256" }
+    ],
+    "name": "bid",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_frackID", "type": "uint256" },
+      { "internalType": "address", "name": "_user", "type": "address" }
+    ],
+    "name": "claimProceeds",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "frackedTokens",
+    "outputs": [
+      {
+        "internalType": "contract IERC721",
+        "name": "nftContract",
+        "type": "address"
+      },
+      { "internalType": "uint256", "name": "nftId", "type": "uint256" },
+      { "internalType": "address", "name": "nftReceiver", "type": "address" },
+      { "internalType": "address", "name": "fracker", "type": "address" },
+      { "internalType": "uint256", "name": "frackTime", "type": "uint256" },
+      {
+        "internalType": "contract MiniMeToken",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IBPool",
+        "name": "balancerPool",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "balancerFlipDuration",
+        "type": "uint256"
+      },
+      { "internalType": "uint256", "name": "minAuctionBid", "type": "uint256" },
+      {
+        "internalType": "uint256",
+        "name": "minBidIncrease",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "auctionDuration",
+        "type": "uint256"
+      },
+      { "internalType": "address", "name": "lastBidder", "type": "address" },
+      { "internalType": "uint256", "name": "lastBid", "type": "uint256" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_nftAddress", "type": "address" },
+      { "internalType": "uint256", "name": "_nftId", "type": "uint256" },
+      { "internalType": "string", "name": "_symbol", "type": "string" },
+      {
+        "internalType": "uint256",
+        "name": "_initialSupply",
+        "type": "uint256"
+      },
+      { "internalType": "uint256", "name": "_amountToPool", "type": "uint256" },
+      { "internalType": "uint256", "name": "_targetPrice", "type": "uint256" },
+      {
+        "internalType": "uint256",
+        "name": "_balancerFlipDuration",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_minAuctionBid",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_minBidIncrease",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_auctionDuration",
+        "type": "uint256"
+      }
+    ],
+    "name": "fractionalize",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "", "type": "address" },
+      { "internalType": "address", "name": "", "type": "address" },
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "name": "onApprove",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "", "type": "address" },
+      { "internalType": "address", "name": "", "type": "address" },
+      { "internalType": "uint256", "name": "", "type": "uint256" }
+    ],
+    "name": "onTransfer",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_frackID", "type": "uint256" }
+    ],
+    "name": "poke",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "name": "proxyPayment",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "_frackID", "type": "uint256" }
+    ],
+    "name": "settle",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
