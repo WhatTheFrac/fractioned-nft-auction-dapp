@@ -65,7 +65,7 @@ const Wallet = (props) => {
           <TokenBalance
             address={address}
             symbol={symbol}
-            decimals={decimals}
+            decimals={Number(decimals)}
             noLogo
           />
         </BoxWrapper>

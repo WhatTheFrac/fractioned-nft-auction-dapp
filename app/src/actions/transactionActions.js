@@ -10,12 +10,14 @@ import {
 } from '../constants/transactionConstants';
 
 // assets
-import erc20Abi from '../assets/abi/erc20.json';
+import frackerAbi from '../assets/abi/fracker.json';
 
 // utils
 import {
+  createTokenSymbol,
   formatTokenAmount,
   getDaiAddress,
+  getERC20Contract,
   getFrackerContractAddress,
   isCaseInsensitiveEqual,
 } from '../utils';
@@ -25,7 +27,7 @@ export const approveTokenTransactionAction = (amount, address) => async (dispatc
   const { wallet: { connected: connectedWallet } } = getState();
   const { address: connectedWalletAddress, networkId } = connectedWallet;
   const daiAddress = getDaiAddress(networkId);
-  const DaiContract = new window.web3.eth.Contract(erc20Abi, daiAddress);
+  const DaiContract = getERC20Contract(daiAddress);
   dispatch({ type: SET_WAITING_FOR_TRANSACTION_SUBMIT });
   DaiContract.methods
     .approve(address, formatTokenAmount(amount))
@@ -47,14 +49,36 @@ export const approveTokenTransactionAction = (amount, address) => async (dispatc
     .catch(() => {});
 };
 
-export const fractionateTransactionAction = () => async (dispatch, getState) => {
+export const fractionateTransactionAction = (
+  nftAddress,
+  nftId,
+  nftName,
+  nftTokenSupplyAmount,
+  nftTokenSellAmount,
+  nftEstimatedValue,
+  minBid,
+  minBidIncrease,
+  auctionDurationSeconds,
+) => async (dispatch, getState) => {
   const { wallet: { connected: connectedWallet } } = getState();
   const { address: connectedWalletAddress, networkId } = connectedWallet;
   dispatch({ type: SET_WAITING_FOR_TRANSACTION_SUBMIT });
   const frackerContractAddress = getFrackerContractAddress(networkId);
-  // TODO: add fractionate contract tx
-  window.web3.eth
-    .sendTransaction({ from: connectedWalletAddress, to: frackerContractAddress }, (err, hash) => {
+  const FrackerContract = new window.web3.eth.Contract(frackerAbi, frackerContractAddress);
+  FrackerContract.methods
+    .fractionalize(
+      nftAddress, // address _nftAddress,
+      nftId, //   uint256 _nftId,
+      createTokenSymbol(nftName), //   string memory _symbol,
+      nftTokenSupplyAmount, //   uint256 _initialSupply,
+      nftTokenSellAmount, //   uint256 _amountToPool,
+      formatTokenAmount(nftEstimatedValue, 18), //   uint256 _targetPrice, // estimated value of nft
+      auctionDurationSeconds, //   uint256 _balancerFlipDuration, // How long it takes to flip the weight
+      formatTokenAmount(minBid), //   uint256 _minAuctionBid,
+      minBidIncrease, //   uint256 _minBidIncrease,
+      auctionDurationSeconds, //   uint256 _auctionDuration
+    )
+    .send({ from: connectedWalletAddress }, (err, hash) => {
       if (err) return; // TODO: transaction failed notification
       const transaction = {
         hash,

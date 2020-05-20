@@ -117,7 +117,7 @@ const FractionateForm = ({
 }) => {
   const [estimatedValue, setEstimatedValue] = useState('');
   const [fractionCountValue, setFractionCountValue] = useState(1000);
-  const [balancerCountValue, setBalancerCountValue] = useState('');
+  const [balancerCountValue, setBalancerCountValue] = useState(0);
   const [selectedNftId, setSelectedNftId] = useState('');
   const [minBid, setMinBid] = useState('');
   const [minBidIncrease, setMinBidIncrease] = useState('');
@@ -137,7 +137,7 @@ const FractionateForm = ({
         .then(setUnlockedDaiAmount)
         .then(() => setGettingDaiAllowance(false));
     }
-  }, [transactions])
+  }, [transactions]);
 
   const selectedNft = nftAssets.find(({ uid }) => uid === selectedNftId) || {};
 
@@ -157,12 +157,12 @@ const FractionateForm = ({
   }
 
   const updateBalancerPortion = portion => updateBalancerCountValue(fractionCountValue * portion / 100);
-  let groupedButtons = [1,5,10,25,50,75,100].map((portion) =>
+  let groupedButtons = [0, 1, 5, 10, 25, 50, 75, 100].map((portion) =>
     <GroupedButton
       key={portion}
       onClick={() => updateBalancerPortion(portion)}
-      isActive={parseInt(balancerCountValue) === fractionCountValue * portion / 100}>
-      {portion + "%"}
+      isActive={(portion === 0 && balancerCountValue === 0) || balancerCountValue === fractionCountValue * portion / 100}>
+      {portion === 0 ? 'None' : portion + "%"}
     </GroupedButton>
   );
 
@@ -189,7 +189,10 @@ const FractionateForm = ({
     unlockDaiButtonTitle = enoughDai ? 'Unlock DAI' : 'Not enough DAI';
   }
 
-  const submitDisabled = !daiUnlocked || isEmpty(selectedNft) || isEmpty(estimatedValue);
+  const putForSale = Number(balancerCountValue) !== 0;
+  const submitDisabled = isEmpty(selectedNft)
+    || isEmpty(estimatedValue)
+    || (putForSale && (!daiUnlocked || !minBid || !minBidIncrease || !auctionDurationSeconds));
 
   return (
     <Flex flexDirection="column" justifyContent="center" alignItems="center" pb={80}>
@@ -201,14 +204,14 @@ const FractionateForm = ({
               <NftAssetsSelect borderless required onChange={setSelectedNftId} />
             </Field>
             <Text style={{ flex: 0.05 }} textAlign="center" mt={40} px={15} fontSize={24} color={'#d2d2d2'}>=</Text>
-            <Field label="Estimated value USD" style={{ flex: 0.43 }}>
+            <Field label="Estimated value in DAI" style={{ flex: 0.43 }}>
               <Input
                 type="text"
                 required
                 onChange={(event) => setEstimatedValue(parseNumberInputValue(event.target.value))}
                 value={estimatedValue}
                 width="100%"
-                placeholder="0.00 USD"
+                placeholder="0.00 DAI"
               />
             </Field>
           </Flex>
@@ -217,7 +220,60 @@ const FractionateForm = ({
           {/*  Confirmed*/}
           {/*</StatusText>*/}
         </InputWrapper>
-        {!isEmpty(selectedNft) && !isEmpty(estimatedValue) && (
+        {!isEmpty(selectedNft) && (
+          <>
+            {renderHeading("Mint Fraction Tokens")}
+            <InputWrapper mt={3}>
+              <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
+                <Field label="How many NFT tokens would you like to create?" style={{ flex: 0.3 }}>
+                  <Input
+                    type="text"
+                    required
+                    onChange={(event) => updateFractionCountValue(parseNumberInputValue(event.target.value, true))}
+                    value={fractionCountValue}
+                    width="100%"
+                  />
+                </Field>
+                <Text style={{ flex: 0.15 }} textAlign="center" mb={28} px={15} fontSize={16} color={'#d2d2d2'}>tokens of</Text>
+                <Flex style={{ flex: 0.6 }} height={80} alignItems="center" justifyContent="center">
+                  <Input
+                    type="text"
+                    value={selectedNft.title}
+                    disabled
+                    style={{ flex: 1 }}
+                  />
+                  <Avatar src={selectedNft.image} size={45} backgroundColor={selectedNft.backgroundColor} ml={3} />
+                </Flex>
+              </Flex>
+              {/*<StatusText>*/}
+              {/*  <StatusIcon><Icon name="Cancel" color="danger" size={17} /></StatusIcon>*/}
+              {/*  Unconfirmed*/}
+              {/*</StatusText>*/}
+            </InputWrapper>
+            {renderHeading("Sell Fraction Tokens")}
+            <InputWrapper mt={3}>
+              <Flex alignItems="flex-end" width="100%">
+                <Field label="What portion would you like to sell?" style={{ flex: 0.2 }}>
+                  <ButtonGroup required style={{ flex: 0.5 }}>{groupedButtons}</ButtonGroup>
+                </Field>
+                <Flex style={{ flex: 0.1 }} height={80} pl={15} alignItems="center" justifyConten="center">
+                  <Input
+                    type="text"
+                    required
+                    onChange={e => updateBalancerCountValue(parseNumberInputValue(e.target.value))}
+                    value={balancerCountValue}
+                    style={{ flex: 1 }}
+                    placeholder={"ie: "+(fractionCountValue/2)}
+                  />
+                </Flex>
+                <Flex style={{ flex: 1 }} flexWrap="nowrap">
+                  <Text mb={28} px={15} fontSize={16}>tokens</Text>
+                </Flex>
+              </Flex>
+            </InputWrapper>
+          </>
+        )}
+        {putForSale && (
           <>
             {renderHeading('DAI allowance', 'This is just another explanation.')}
             <InputWrapper mt={3}>
@@ -257,88 +313,35 @@ const FractionateForm = ({
             </InputWrapper>
           </>
         )}
-        {!!daiUnlocked && !isEmpty(selectedNft) && (
-          <>
-            {renderHeading("Mint Fraction Tokens")}
-            <InputWrapper mt={3}>
-              <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
-                <Field label="How many NFT tokens would you like to create?" style={{ flex: 0.3 }}>
-                  <Input
-                    type="text"
-                    required
-                    onChange={(event) => updateFractionCountValue(parseNumberInputValue(event.target.value, true))}
-                    value={fractionCountValue}
-                    width="100%"
-                  />
-                </Field>
-                <Text style={{ flex: 0.15 }} textAlign="center" mb={28} px={15} fontSize={16} color={'#d2d2d2'}>tokens of</Text>
-                <Flex style={{ flex: 0.6 }} height={80} alignItems="center" justifyContent="center">
-                  <Input
-                    type="text"
-                    value={selectedNft.title}
-                    disabled
-                    style={{ flex: 1 }}
-                  />
-                  <Avatar src={selectedNft.image} size={45} backgroundColor={selectedNft.backgroundColor} ml={3} />
-                </Flex>
-              </Flex>
-              {/*<StatusText>*/}
-              {/*  <StatusIcon><Icon name="Cancel" color="danger" size={17} /></StatusIcon>*/}
-              {/*  Unconfirmed*/}
-              {/*</StatusText>*/}
-            </InputWrapper>
-            {renderHeading("Sell Fraction Tokens")}
-            <InputWrapper mt={3}>
-              <Flex alignItems="flex-end" flexWrap="wrap" width="100%">
-                <Field label="What portion would you like to sell?" style={{ flex: 0.3 }}>
-                  <ButtonGroup required style={{ flex: 0.5 }}>{groupedButtons}</ButtonGroup>
-                </Field>
-                <Flex style={{ flex: 0.1 }} height={80} pl={15} alignItems="center" justifyConten="center">
-                  <Input
-                    type="text"
-                    required
-                    onChange={e => updateBalancerCountValue(parseNumberInputValue(e.target.value))}
-                    value={balancerCountValue}
-                    style={{ flex: 1 }}
-                    placeholder={"ie: "+(fractionCountValue/2)}
-                  />
-                </Flex>
-                <Flex style={{ flex: 0.4 }} flexWrap="nowrap">
-                  <Text mb={28} px={15} fontSize={16}>tokens</Text>
-                </Flex>
-              </Flex>
-            </InputWrapper>
-          </>
-        )}
-        {!!balancerCountValue && (
+        {putForSale && !!daiUnlocked && (
           <>
             {renderHeading("Provide Auction Details")}
               <InputWrapper mt={3}>
                 <Flex flexWrap="wrap" width="100%">
-                  <Field label="Minimum bid USD" pr={16} style={{ flex: 0.33 }}>
+                  <Field label="Minimum bid in DAI" pr={16} style={{ flex: 0.33 }}>
                     <Input
                       type="text"
                       required
                       onChange={(event) => setMinBid(parseNumberInputValue(event.target.value))}
                       value={minBid}
                       width="100%"
-                      placeholder="0.00 USD"
+                      placeholder="0.00 DAI"
                     />
                   </Field>
                   <Field label="Minimum bid increase" height={80} pr={16} style={{ flex: 0.33 }}>
                     <StyledDropdown
                       required
                       options={minBidIncreaseOptions}
-                      onChange={setMinBidIncrease}
-                      value={minBidIncrease}
+                      onChange={(option) => setMinBidIncrease(option.value)}
+                      value={minBidIncreaseOptions.find(({ value }) => value === minBidIncrease)}
                     />
                   </Field>
                   <Field label="Auction duration" height={80} style={{ flex: 0.34 }}>
                     <StyledDropdown
                       required
                       options={auctionDurationOptions}
-                      onChange={setAuctionDurationSeconds}
-                      value={auctionDurationSeconds}
+                      onChange={(option) => setAuctionDurationSeconds(option.value)}
+                      value={auctionDurationOptions.find(({ value }) => value === auctionDurationSeconds)}
                     />
                   </Field>
                 </Flex>
@@ -352,7 +355,12 @@ const FractionateForm = ({
       </FormWrapper>
       <FractionateButton
         selectedNft={selectedNft}
-        nftTokenAmount={Number(fractionCountValue) || 1000}
+        nftTokenSupplyAmount={Number(fractionCountValue) || 1000}
+        nftEstimatedValue={Number(estimatedValue)}
+        nftTokenSellAmount={putForSale ? Number(balancerCountValue) : 0}
+        minBid={putForSale ? Number(minBid) : 0}
+        minBidIncrease={putForSale ? Number(minBidIncrease) : 0}
+        auctionDurationSeconds={putForSale ? Number(auctionDurationSeconds) : 0}
         buttonProps={{
           disabled: !!submitDisabled,
           mt: 40,
