@@ -126,12 +126,6 @@ const FractionateForm = ({
   const [unlockedDaiAmount, setUnlockedDaiAmount] = useState(0);
   const [gettingDaiAllowance, setGettingDaiAllowance] = useState(false);
 
-  console.log({
-    minBid: minBid,
-    minBidIncrease: minBidIncrease,
-    auctionDurationSeconds: auctionDurationSeconds,
-  });
-
   const DEPOSIT_NFT_EXPLANATION =
     "The NFT that you would like to create fractional shares for, and sell in an auction.";
 
