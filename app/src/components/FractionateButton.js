@@ -44,10 +44,6 @@ const FractionateButton = ({
   minBid,
   minBidIncrease,
   auctionDurationSeconds,
-  nftTokenSellAmount,
-  minBid,
-  minBidIncrease,
-  auctionDurationSeconds,
 }) => {
   // TODO const { } = props;
 
@@ -342,10 +338,6 @@ FractionateButton.propTypes = {
   nftTokenSupplyAmount: PropTypes.number,
   nftTokenSellAmount: PropTypes.number,
   nftEstimatedValue: PropTypes.number,
-  minBid: PropTypes.number,
-  minBidIncrease: PropTypes.number,
-  auctionDurationSeconds: PropTypes.number,
-  nftTokenSellAmount: PropTypes.number,
   minBid: PropTypes.number,
   minBidIncrease: PropTypes.number,
   auctionDurationSeconds: PropTypes.number,
