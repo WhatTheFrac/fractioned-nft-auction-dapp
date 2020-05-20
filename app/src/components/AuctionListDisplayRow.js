@@ -7,13 +7,15 @@ import { connect } from "react-redux";
 import { theme } from "rimble-ui";
 
 // utils
-import { getTimeRemainingDisplay, TimeGranularity } from "../utils";
+import { getTimeRemainingDisplay, TimeGranularity, EMPTY_ADDRESS } from "../utils";
 
 const ListItem = styled(Card)`
   position: relative;
   border-radius: 12px;
   margin-bottom: 20px;
 `;
+
+const BALANCER_SWAP_ADDRESS = 'https://balancer.exchange/#/swap/';
 
 const AuctionDisplay = ({ nftAssets, auction, selectAction }) => {
   const getNFTName = () => "Kitties 98524";
@@ -25,12 +27,21 @@ const AuctionDisplay = ({ nftAssets, auction, selectAction }) => {
   const timeRemaining = Math.max(getAuctionEndTimestampMS() - +new Date(), 0);
 
   let timerDisplay = timeRemaining === 0
-    ? "Auction is over."
+    ? "Fractionate is complete."
     : "Ends in " + getTimeRemainingDisplay(timeRemaining, TimeGranularity.MINUTES);
 
   const lastBidAmount = () => parseInt(auction.lastBid);
 
   const NFT_DISPLAY_SIZE = 80;
+
+  let balancerButton = null;
+  if (auction.balancerPool !== EMPTY_ADDRESS && auction.token != null) {
+    let balancerAddress = BALANCER_SWAP_ADDRESS + auction.token;
+    balancerButton =
+      <Button mt={20} as="a" href={balancerAddress} target="\_blank" title="Learn more">
+        Open Balancer Pool
+      </Button>;
+  }
 
   return (
       <ListItem>
@@ -52,6 +63,7 @@ const AuctionDisplay = ({ nftAssets, auction, selectAction }) => {
           <Flex flexDirection="column" alignItems="center">
             <Button mb={20} onClick={selectAction}>Go To Auction</Button>
             <Text color={theme.colors.grey}>Current bid: {lastBidAmount()}</Text>
+            {balancerButton}
           </Flex>
         </Flex>
       </ListItem>

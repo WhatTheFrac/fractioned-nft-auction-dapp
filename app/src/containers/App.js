@@ -82,7 +82,7 @@ const App = (props) => {
       content: isWalletConnected && <FractionateForm />
     },
     {
-      title: "Auctions",
+      title: "Fractionated Items",
       content: <AuctionListDisplay allFracExisting={allFracExisting} />,
     },
   ];
