@@ -14,7 +14,7 @@ import { isCaseInsensitiveEqual } from '../utils';
 const initialState = {
   data: [],
   waitingForSubmit: false,
-  allFrac: {},
+  allFrac: [],
 };
 
 const collectiblesReducer = (state = initialState, action) => {

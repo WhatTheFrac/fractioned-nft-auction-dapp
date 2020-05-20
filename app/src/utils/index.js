@@ -115,6 +115,8 @@ export const AuctionState = {
   AUCTION_OVER: 'auction_over',
 };
 
+export const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+
 export const ExplanationString = {
   depositNftExplanation:
     "The NFT that you would like to create fractional shares for, and sell in an auction.",
@@ -130,4 +132,35 @@ export const ExplanationString = {
   auctionExplanation:
     "Details of the auction in which this NFT is sold and you get your share of the proceeds.",
   auctionDurationExplanation: "How long from now the Auction will conclude.",
+}
+
+export const TimeGranularity = {
+  DAYS: 'DAYS',
+  HOURS: 'HOURS',
+  MINUTES: 'MINUTES',
+  SECONDS: 'SECONDS',
+};
+
+
+export const getTimeRemainingDisplay = (timeRemaining, timeGranularity) => {
+  if (timeGranularity == null || !(timeGranularity in TimeGranularity)) {
+    timeGranularity = TimeGranularity.MINUTES;
+  }
+
+  let days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+  let hours = Math.floor((timeRemaining / (1000 * 60 * 60)) % 24);
+  let minutes = Math.floor((timeRemaining / 1000 / 60) % 60);
+  let seconds = Math.floor((timeRemaining / 1000) % 60);
+
+  let timerDisplay = "";
+  timerDisplay = timerDisplay.concat(" " + days + " " + (days > 1 ? "days" : "day"));
+  if (timeGranularity === TimeGranularity.DAYS) return timerDisplay;
+  timerDisplay = timerDisplay.concat(" " + hours + " " + (hours > 1 ? "hours" : "hour"));
+  if (timeGranularity === TimeGranularity.HOURS) return timerDisplay;
+  timerDisplay = timerDisplay.concat(" " + minutes + " " + (minutes > 1 ? "minutes" : "minute"));
+  if (timeGranularity === TimeGranularity.MINUTES) return timerDisplay;
+  timerDisplay = timerDisplay.concat(" " + seconds + " " + (seconds > 1 ? "seconds" : "second"));
+  if (timeGranularity === TimeGranularity.SECONDS) return timerDisplay;
+
+  return timerDisplay;
 }

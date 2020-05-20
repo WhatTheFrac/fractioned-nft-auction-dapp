@@ -27,7 +27,7 @@ export const getLoadAllFracAction = () => async (dispatch, getState) => {
   const allFrac = await loadAllFrac();
   dispatch({
     type: ADD_ALL_FRAC,
-    payload: [allFrac],
+    payload: allFrac,
   });
 };
 

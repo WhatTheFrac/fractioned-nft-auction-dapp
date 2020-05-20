@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import ConnectionBanner from '@rimble/connection-banner';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Loader, Box, Flex, Text, Flash } from 'rimble-ui';
+import { Loader, Box, Flex, Flash } from 'rimble-ui';
 import isEmpty from 'lodash/isEmpty';
 
 // components
@@ -83,7 +83,7 @@ const App = (props) => {
     },
     {
       title: "Auctions",
-      content: <AuctionListDisplay allFrac={allFracExisting} />,
+      content: <AuctionListDisplay allFracExisting={allFracExisting} />,
     },
   ];
 
@@ -111,12 +111,12 @@ App.propTypes = {
   getConnectedWallet: PropTypes.func,
   connectedWallet: PropTypes.object,
   loadAllFrac: PropTypes.func,
-  allFracExisting: PropTypes.object,
+  allFracExisting: PropTypes.any,
 };
 
 const mapStateToProps = ({
   wallet: { connected: connectedWallet },
-  allFrac: { allFrac: allFracExisting },
+  transactions: { allFrac: allFracExisting },
 }) => ({
   connectedWallet,
   allFracExisting,
