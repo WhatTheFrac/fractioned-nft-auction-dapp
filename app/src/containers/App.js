@@ -95,7 +95,7 @@ const App = (props) => {
           <TopRight>
             <Wallet />
           </TopRight>
-          <Flash my={3} variant="danger">
+          <Flash my={3} variant="danger" mb={40}>
             This is untested and is not guaranteed to work. Do not use with any real funds or items.
           </Flash>
           <Box>

@@ -99,11 +99,9 @@ const renderHeading = (title, description) => (
   <Heading as={"h3"} px={30} pt={40} pb={20}>
     {title}
     {!!description && (
-      <Box ml={1} display="inline-block">
-        <Tooltip message={description}>
-          <Icon name="Info" size={15} color="#4E3FCE" />
-        </Tooltip>
-      </Box>
+      <Flex mt={2}>
+        <Text fontSize={1}>{description}</Text>
+      </Flex>
     )}
   </Heading>
 );
@@ -177,7 +175,7 @@ const FractionateForm = ({
 
   const daiAllowanceTransaction = transactions.find((transaction) => transaction.type === TRANSACTION_TYPE.TOKEN_APPROVE) || {};
   const isDaiAllowanceTransactionPending = daiAllowanceTransaction.status === STATUS_PENDING;
-  const daiAmount = Number((estimatedValue * 0.02).toFixed(18)); // DAI has 18 decimals
+  const daiAmount = Number((balancerCountValue / fractionCountValue) * (estimatedValue * 0.02).toFixed(18)); // DAI has 18 decimals
   const { balance: daiBalance = 0 } = balances.find((balance) => balance.symbol === 'DAI') || {};
   const daiUnlocked = !!daiAmount && unlockedDaiAmount >= daiAmount;
   const enoughDai = !!daiAmount && daiBalance >= daiAmount;
@@ -276,11 +274,11 @@ const FractionateForm = ({
         )}
         {putForSale && (
           <>
-            {renderHeading('DAI allowance', 'This is just another explanation.')}
+            {renderHeading('DAI allowance', ExplanationString.daiAllowanceExplanation )}
             <InputWrapper mt={3}>
               <Flex flexWrap="wrap" width="100%" alignItems="flex-end">
                 <Field
-                  label="DAI amount (2% of NFT estimate)"
+                  label="DAI amount (2% of value of tokens being sent to the pool)"
                   style={{ flex: 1 }}
                   pr={4}
                 >
@@ -319,7 +317,7 @@ const FractionateForm = ({
             {renderHeading("Provide Auction Details", ExplanationString.auctionExplanation)}
               <InputWrapper mt={3}>
                 <Flex flexWrap="wrap" width="100%">
-                  <Field label="Minimum bid in DAI" pr={16} style={{ flex: 0.33 }}>
+                  <Field label="Min starting bid for NFT" pr={16} style={{ flex: 0.33 }}>
                     <Input
                       type="text"
                       required
@@ -329,7 +327,7 @@ const FractionateForm = ({
                       placeholder="0.00 DAI"
                     />
                   </Field>
-                  <Field label="Minimum bid increase" height={80} pr={16} style={{ flex: 0.33 }}>
+                  <Field label="Min bid increase over last" height={80} pr={16} style={{ flex: 0.33 }}>
                     <StyledDropdown
                       required
                       options={minBidIncreaseOptions}
