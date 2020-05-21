@@ -188,10 +188,13 @@ const FractionateForm = ({
     unlockDaiButtonTitle = enoughDai ? 'Unlock DAI' : 'Not enough DAI';
   }
 
-  const putForSale = Number(balancerCountValue) !== 0;
   const submitDisabled = isEmpty(selectedNft)
     || isEmpty(estimatedValue)
-    || (putForSale && (!daiUnlocked || !minBid || !minBidIncrease || !auctionDurationSeconds));
+    || (!balancerCountValue && balancerCountValue !== 0)
+    || (!!balancerCountValue && !daiUnlocked)
+    || !minBid
+    || !minBidIncrease
+    || !auctionDurationSeconds;
 
   return (
     <Flex flexDirection="column" justifyContent="center" alignItems="center" pb={80}>
@@ -249,6 +252,41 @@ const FractionateForm = ({
               {/*  Unconfirmed*/}
               {/*</StatusText>*/}
             </InputWrapper>
+            {renderHeading("Provide Auction Details", ExplanationString.auctionExplanation)}
+            <InputWrapper mt={3}>
+              <Flex flexWrap="wrap" width="100%">
+                <Field label="Min starting bid for NFT" pr={16} style={{ flex: 0.33 }}>
+                  <Input
+                    type="text"
+                    required
+                    onChange={(event) => setMinBid(parseNumberInputValue(event.target.value))}
+                    value={minBid}
+                    width="100%"
+                    placeholder="0.00 DAI"
+                  />
+                </Field>
+                <Field label="Min bid increase over last" height={80} pr={16} style={{ flex: 0.33 }}>
+                  <StyledDropdown
+                    required
+                    options={minBidIncreaseOptions}
+                    onChange={(option) => setMinBidIncrease(option.value)}
+                    value={minBidIncreaseOptions.find(({ value }) => value === minBidIncrease)}
+                  />
+                </Field>
+                <Field label="Auction duration" height={80} style={{ flex: 0.34 }}>
+                  <StyledDropdown
+                    required
+                    options={auctionDurationOptions}
+                    onChange={(option) => setAuctionDurationSeconds(option.value)}
+                    value={auctionDurationOptions.find(({ value }) => value === auctionDurationSeconds)}
+                  />
+                </Field>
+              </Flex>
+              {/*<StatusText isSuccess>*/}
+              {/*  <StatusIcon><Icon name="CheckCircle" color="success" size={17} /></StatusIcon>*/}
+              {/*  Confirmed*/}
+              {/*</StatusText>*/}
+            </InputWrapper>
             {renderHeading("Sell Fraction Tokens", ExplanationString.sellFractionExplanation)}
             <InputWrapper mt={3}>
               <Flex alignItems="flex-end" width="100%">
@@ -272,7 +310,7 @@ const FractionateForm = ({
             </InputWrapper>
           </>
         )}
-        {putForSale && (
+        {!!balancerCountValue && (
           <>
             {renderHeading('DAI allowance', ExplanationString.daiAllowanceExplanation )}
             <InputWrapper mt={3}>
@@ -312,54 +350,15 @@ const FractionateForm = ({
             </InputWrapper>
           </>
         )}
-        {putForSale && !!daiUnlocked && (
-          <>
-            {renderHeading("Provide Auction Details", ExplanationString.auctionExplanation)}
-              <InputWrapper mt={3}>
-                <Flex flexWrap="wrap" width="100%">
-                  <Field label="Min starting bid for NFT" pr={16} style={{ flex: 0.33 }}>
-                    <Input
-                      type="text"
-                      required
-                      onChange={(event) => setMinBid(parseNumberInputValue(event.target.value))}
-                      value={minBid}
-                      width="100%"
-                      placeholder="0.00 DAI"
-                    />
-                  </Field>
-                  <Field label="Min bid increase over last" height={80} pr={16} style={{ flex: 0.33 }}>
-                    <StyledDropdown
-                      required
-                      options={minBidIncreaseOptions}
-                      onChange={(option) => setMinBidIncrease(option.value)}
-                      value={minBidIncreaseOptions.find(({ value }) => value === minBidIncrease)}
-                    />
-                  </Field>
-                  <Field label="Auction duration" height={80} style={{ flex: 0.34 }}>
-                    <StyledDropdown
-                      required
-                      options={auctionDurationOptions}
-                      onChange={(option) => setAuctionDurationSeconds(option.value)}
-                      value={auctionDurationOptions.find(({ value }) => value === auctionDurationSeconds)}
-                    />
-                  </Field>
-                </Flex>
-                {/*<StatusText isSuccess>*/}
-                {/*  <StatusIcon><Icon name="CheckCircle" color="success" size={17} /></StatusIcon>*/}
-                {/*  Confirmed*/}
-                {/*</StatusText>*/}
-              </InputWrapper>
-          </>
-        )}
       </FormWrapper>
       <FractionateButton
         selectedNft={selectedNft}
         nftTokenSupplyAmount={Number(fractionCountValue) || 1000}
         nftEstimatedValue={Number(estimatedValue)}
-        nftTokenSellAmount={putForSale ? Number(balancerCountValue) : 0}
-        minBid={putForSale ? Number(minBid) : 0}
-        minBidIncrease={putForSale ? Number(minBidIncrease) : 0}
-        auctionDurationSeconds={putForSale ? Number(auctionDurationSeconds) : 0}
+        nftTokenSellAmount={Number(balancerCountValue)}
+        minBid={Number(minBid)}
+        minBidIncrease={Number(minBidIncrease)}
+        auctionDurationSeconds={Number(auctionDurationSeconds)}
         buttonProps={{
           disabled: !!submitDisabled,
           mt: 40,
