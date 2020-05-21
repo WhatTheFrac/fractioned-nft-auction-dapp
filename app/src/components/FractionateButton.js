@@ -277,22 +277,18 @@ const FractionateButton = ({
                       secondaryData={`2% of token worth`}
                     />
                   )}
-                  {putForSale && (
-                    <FractionateModalInfoRow
-                      title="Auction Bid Settings"
-                      description={ExplanationString.auctionExplanation}
-                      data={`Min bid is ${Number(minBid.toFixed(18))} DAI`}
-                      secondaryData={`Min bid increase: ${minBidIncrease}%`}
-                    />
-                  )}
-                  {putForSale && (
-                    <FractionateModalInfoRow
-                      title="Auction duration"
-                      description={ExplanationString.auctionDurationExplanation}
-                      data={durationDisplayValue}
-                      secondaryData={durationDeadlineDisplayValue}
-                    />
-                  )}
+                  <FractionateModalInfoRow
+                    title="Auction Bid Settings"
+                    description={ExplanationString.auctionExplanation}
+                    data={`Min bid is ${Number(minBid.toFixed(18))} DAI`}
+                    secondaryData={`Min bid increase: ${minBidIncrease}%`}
+                  />
+                  <FractionateModalInfoRow
+                    title="Auction duration"
+                    description={ExplanationString.auctionDurationExplanation}
+                    data={durationDisplayValue}
+                    secondaryData={durationDeadlineDisplayValue}
+                  />
                   {/*<FractionateModalInfoRow*/}
                   {/*  title="Transaction Fee"*/}
                   {/*  description="Pays the Ethereum network to process your transaction. Spent even if the transaction fails."*/}
