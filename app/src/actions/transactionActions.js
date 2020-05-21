@@ -75,15 +75,16 @@ export const fractionateTransactionAction = (
   dispatch({ type: SET_WAITING_FOR_TRANSACTION_SUBMIT });
   const frackerContractAddress = getFrackerContractAddress(networkId);
   const FrackerContract = new window.web3.eth.Contract(frackerAbi, frackerContractAddress);
+  const createBalancerPool = nftTokenSellAmount > 0;
   FrackerContract.methods
     .fractionalize(
       nftAddress, // address _nftAddress,
       nftId, //   uint256 _nftId,
       createTokenSymbol(nftName), //   string memory _symbol,
-      nftTokenSupplyAmount, //   uint256 _initialSupply,
-      nftTokenSellAmount, //   uint256 _amountToPool,
+      formatTokenAmount(nftTokenSupplyAmount, 18), //   uint256 _initialSupply,
+      createBalancerPool ? formatTokenAmount(nftTokenSellAmount, 18) : 0, //   uint256 _amountToPool,
       formatTokenAmount(nftEstimatedValue, 18), //   uint256 _targetPrice, // estimated value of nft
-      auctionDurationSeconds, //   uint256 _balancerFlipDuration, // How long it takes to flip the weight
+      createBalancerPool ? auctionDurationSeconds - 1 : 0, //   uint256 _balancerFlipDuration, // How long it takes to flip the weight
       formatTokenAmount(minBid), //   uint256 _minAuctionBid,
       minBidIncrease, //   uint256 _minBidIncrease,
       auctionDurationSeconds, //   uint256 _auctionDuration
