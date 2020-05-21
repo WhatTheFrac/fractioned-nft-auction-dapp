@@ -127,15 +127,25 @@ export const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 export const ExplanationString = {
   depositNftExplanation:
     "The NFT that you would like to create fractional shares for, and sell in an auction.",
-  daiAllowanceExplanation:
-    "In order to sell your fractional tokens in the balancer pool, "
-    + "you need to seed the pool with dai liquidity.",
-  mintFractionExplanation:
-    "This is the number of fractional tokens you would like to create, "
-    + "these will represent ownership of the token and holders will get a proportional "
-    + "fraction of the auction proceeds.",
-  sellFractionExplanation:
-    "The number of the newly created fractional tokens you would like to distribute through the Balancer pool.",
+  daiAllowanceExplanation: `
+    Based on the value of the NFT you specified and the portion you would like to sell,
+    you will need to the balancer pool with 2% of the value of the tokens provided in DAI.
+  `,
+  mintFractionExplanation: `
+    This is the number of fractional tokens you would like to create,
+    these will represent ownership of the NFT and holders will get a proportional
+    fraction of the auction proceeds.
+  `,
+  sellFractionExplanation: `
+    The number of the newly created fractional tokens you would like to distribute
+    through a Balancer pool. This will take an even value of DAI that you provide and
+    fractional tokens, calculated based on the estimated NFT value in DAI in the first box.
+    The pool will start at a 2:98 value of DAI:Fractional Tokens, and will flip to 98:2 over time,
+    while arbitrageurs buy and sell the tokens during this time, leaving you with DAI that arbitrageurs
+    provided in place of the fractional tokens you provided. The flip duration will be equal to the
+    auction duration provided above.
+    NOTE: If you do not wish to distribute the tokens in this way, select None.
+  `,
   auctionExplanation:
     "Details of the auction in which this NFT is sold and you get your share of the proceeds.",
   auctionDurationExplanation: "How long from now the Auction will conclude.",
