@@ -11,16 +11,19 @@ const CircleImage = styled(Avatar)`
 `;
 
 const SelectedOptionWrapper = styled(Flex)`
-  cursor: pointer;
   height: 3rem;
   padding: 10px 16px;
   border: 1px solid transparent;
   border-color: #ccc;
   border-radius: 4px;
   box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
-  &:hover {
-    box-shadow: 0px 2px 6px rgba(0,0,0,0.3);
-  }
+  ${({ disabled }) => !disabled && `
+    cursor: pointer;
+    &:hover {
+      box-shadow: 0px 2px 6px rgba(0,0,0,0.3);
+    }
+  `}
+  ${({ disabled }) => !!disabled && `&, * { cursor: not-allowed !important; }`}
 `;
 
 const StyledInput = styled.input`
@@ -42,6 +45,7 @@ const NftAssetsSelect = ({
   assets,
   isFetching,
   onChange,
+  disabled,
 }) => {
   const selectOptions = assets.map((asset) => {
     const { title: name, uid, backgroundColor, image } = asset;
@@ -53,7 +57,7 @@ const NftAssetsSelect = ({
     }
   });
 
-  const selectDisabled = isFetching || !assets || !assets.length;
+  const selectDisabled = disabled || isFetching || !assets || !assets.length;
 
   const renderSelectedOption = (valueProps, snapshot, className) => {
     const { value } = snapshot;
@@ -68,7 +72,7 @@ const NftAssetsSelect = ({
     }
 
     return (
-      <SelectedOptionWrapper>
+      <SelectedOptionWrapper disabled={selectDisabled}>
         {value && renderOptionImage(value)}
         <StyledInput
           {...valueProps}
@@ -98,6 +102,7 @@ NftAssetsSelect.propTypes = {
   isFetching: PropTypes.bool,
   assets: PropTypes.array,
   onChange: PropTypes.func,
+  disabled: PropTypes.bool,
 };
 
 const mapStateToProps = ({

@@ -12,7 +12,7 @@ import {
   Box,
   Icon,
   Loader,
-  Tooltip,
+  Link,
   theme,
 } from 'rimble-ui';
 import { Dai as DaiIcon } from '@rimble/icons';
@@ -22,7 +22,8 @@ import { connect } from 'react-redux';
 import Dropdown from 'react-dropdown';
 
 // actions
-import { approveTokenTransactionAction } from '../actions/transactionActions';
+import { approveNftTransactionAction, approveTokenTransactionAction } from '../actions/transactionActions';
+import { removeNftFromWalletAssetsAction } from '../actions/walletActions';
 
 // components
 import NftAssetsSelect from './NftAssetsSelect';
@@ -38,6 +39,8 @@ import {
   getTokenAllowance,
   parseNumberInputValue,
   ExplanationString,
+  getTransactionDetailsLink,
+  isNftTransferApproved,
 } from '../utils';
 
 
@@ -64,7 +67,7 @@ const StatusIcon = styled.span`
 `;
 
 const StatusText = styled(Text)`
-  color: ${({ isSuccess }) => isSuccess ? '#605e69' : '#c2c2c2'};
+  color: #605e69;
   font-size: 15px;
 `;
 
@@ -113,6 +116,8 @@ const FractionateForm = ({
   connectedWalletAddress,
   networkId,
   approveTokenTransaction,
+  approveNftTransaction,
+  removeNftFromWalletAssets,
 }) => {
   const [estimatedValue, setEstimatedValue] = useState('');
   const [fractionCountValue, setFractionCountValue] = useState(1000);
@@ -123,22 +128,47 @@ const FractionateForm = ({
   const [auctionDurationSeconds, setAuctionDurationSeconds] = useState('');
   const [unlockedDaiAmount, setUnlockedDaiAmount] = useState(0);
   const [gettingDaiAllowance, setGettingDaiAllowance] = useState(false);
+  const [gettingTokenApproval, setGettingTokenApproval] = useState(false);
+  const [approvedNftId, setApprovedNftId] = useState('');
+
+  const resetForm = (isSuccess) => {
+    if (isSuccess) removeNftFromWalletAssets(selectedNftId);
+    setEstimatedValue('');
+    setFractionCountValue(1000);
+    setBalancerCountValue(0);
+    setSelectedNftId('');
+    setMinBid('');
+    setMinBidIncrease('');
+    setAuctionDurationSeconds('');
+  };
 
   useEffect(() => {
-    if (!gettingDaiAllowance) {
-      setGettingDaiAllowance(true);
-      getTokenAllowance(
-        connectedWalletAddress,
-        getFrackerContractAddress(networkId),
-        getDaiAddress(networkId),
-        18,
-      )
-        .then(setUnlockedDaiAmount)
-        .then(() => setGettingDaiAllowance(false));
-    }
+    if (gettingDaiAllowance) return;
+    setGettingDaiAllowance(true);
+    getTokenAllowance(
+      connectedWalletAddress,
+      getFrackerContractAddress(networkId),
+      getDaiAddress(networkId),
+      18,
+    )
+      .then(setUnlockedDaiAmount)
+      .then(() => setGettingDaiAllowance(false));
   }, [transactions]);
 
   const selectedNft = nftAssets.find(({ uid }) => uid === selectedNftId) || {};
+
+  useEffect(() => {
+    if (gettingTokenApproval || !selectedNftId) return;
+    setGettingTokenApproval(true);
+    isNftTransferApproved(
+      getFrackerContractAddress(networkId),
+      selectedNft.tokenAddress,
+      selectedNft.tokenId,
+    )
+      .then((isApproved) => isApproved && setApprovedNftId(selectedNft.uid))
+      .then(() => setGettingTokenApproval(false));
+  }, [transactions, selectedNftId]);
+
 
   const updateFractionCountValue = count => {
     setFractionCountValue(parseInt(count));
@@ -173,7 +203,7 @@ const FractionateForm = ({
     { value: 2592000, label: "1 month" }
   ];
 
-  const daiAllowanceTransaction = transactions.find((transaction) => transaction.type === TRANSACTION_TYPE.TOKEN_APPROVE) || {};
+  const daiAllowanceTransaction = transactions.find((transaction) => transaction.type === TRANSACTION_TYPE.FRACTIONATE_TOKEN_APPROVE) || {};
   const isDaiAllowanceTransactionPending = daiAllowanceTransaction.status === STATUS_PENDING;
   const daiAmount = Number((balancerCountValue / fractionCountValue) * (estimatedValue * 0.02).toFixed(18)); // DAI has 18 decimals
   const { balance: daiBalance = 0 } = balances.find((balance) => balance.symbol === 'DAI') || {};
@@ -181,12 +211,11 @@ const FractionateForm = ({
   const enoughDai = !!daiAmount && daiBalance >= daiAmount;
   const unlockDaiButtonDisabled = !enoughDai || daiUnlocked || gettingDaiAllowance || isDaiAllowanceTransactionPending;
 
-  let unlockDaiButtonTitle;
-  if (isDaiAllowanceTransactionPending) {
-    unlockDaiButtonTitle = <Text ml={1} mt={-1}>Pending...</Text>;
-  } else {
-    unlockDaiButtonTitle = enoughDai ? 'Unlock DAI' : 'Not enough DAI';
-  }
+  const nftApprovalTransaction = transactions.find((transaction) => transaction.type === TRANSACTION_TYPE.FRACTIONATE_NFT_APPROVE) || {};
+  const isNftApprovalTransactionPending = nftApprovalTransaction.status === STATUS_PENDING;
+  const selectedNftApproved = approvedNftId === selectedNft.uid;
+
+  const unlockDaiButtonTitle = enoughDai ? 'Unlock DAI' : 'Not enough DAI';
 
   const submitDisabled = isEmpty(selectedNft)
     || isEmpty(estimatedValue)
@@ -194,7 +223,8 @@ const FractionateForm = ({
     || (!!balancerCountValue && !daiUnlocked)
     || !minBid
     || !minBidIncrease
-    || !auctionDurationSeconds;
+    || !auctionDurationSeconds
+    || !selectedNftApproved;
 
   return (
     <Flex flexDirection="column" justifyContent="center" alignItems="center" pb={80}>
@@ -203,10 +233,25 @@ const FractionateForm = ({
         <InputWrapper mt={3}>
           <Flex flexWrap="wrap" width="100%">
             <Field label="NFT" style={{ flex: 0.52 }}>
-              <NftAssetsSelect borderless required onChange={setSelectedNftId} />
+              <NftAssetsSelect
+                borderless
+                required
+                onChange={setSelectedNftId}
+                disabled={gettingTokenApproval || !!isNftApprovalTransactionPending}
+              />
             </Field>
+              <Button.Outline
+                style={{ flex: 0.2, marginLeft: 15, marginTop: 29 }}
+                disabled={!!selectedNftApproved || isEmpty(selectedNft) || !!isNftApprovalTransactionPending}
+                onClick={() => approveNftTransaction(selectedNft.tokenAddress, selectedNft.tokenId, getFrackerContractAddress(networkId))}
+              >
+                {(!!gettingTokenApproval || isNftApprovalTransactionPending) && <Loader size={20} />}
+                {!gettingTokenApproval && !isNftApprovalTransactionPending && !isEmpty(selectedNft) && !selectedNftApproved && "Unlock"}
+                {!!selectedNftApproved && "Unlocked"}
+                {!gettingTokenApproval && isEmpty(selectedNft) && "Select NFT"}
+              </Button.Outline>
             <Text style={{ flex: 0.05 }} textAlign="center" mt={40} px={15} fontSize={24} color={'#d2d2d2'}>=</Text>
-            <Field label="Estimated value in DAI" style={{ flex: 0.43 }}>
+            <Field label="Estimated value in DAI" style={{ flex: 0.33 }}>
               <Input
                 type="text"
                 required
@@ -217,10 +262,18 @@ const FractionateForm = ({
               />
             </Field>
           </Flex>
-          {/*<StatusText isSuccess>*/}
-          {/*  <StatusIcon><Icon name="CheckCircle" color="success" size={17} /></StatusIcon>*/}
-          {/*  Confirmed*/}
-          {/*</StatusText>*/}
+          <StatusText>
+            <StatusIcon>
+              {!!selectedNftApproved && !isNftApprovalTransactionPending && <Icon name="CheckCircle" color="success" size={17} />}
+              {!selectedNftApproved && !isNftApprovalTransactionPending && <Icon name="Cancel" color="danger" size={17} />}
+              {!selectedNftApproved && !!isNftApprovalTransactionPending && <Icon name="QueryBuilder" color="blue" size={17} />}
+            </StatusIcon>
+            {!!selectedNftApproved && !isNftApprovalTransactionPending && 'Confirmed'}
+            {!selectedNftApproved && !isNftApprovalTransactionPending && 'Unconfirmed'}
+            {!selectedNftApproved && !!isNftApprovalTransactionPending && (
+              <Link color="#605e69" href={getTransactionDetailsLink(nftApprovalTransaction.hash, networkId)} target="_blank">Pending</Link>
+            )}
+          </StatusText>
         </InputWrapper>
         {!isEmpty(selectedNft) && (
           <>
@@ -335,17 +388,22 @@ const FractionateForm = ({
                     onClick={() => approveTokenTransaction(daiAmount, getFrackerContractAddress(networkId))}
                   >
                     {(!!gettingDaiAllowance || isDaiAllowanceTransactionPending) && <Loader size={20} />}
-                    {!gettingDaiAllowance && unlockDaiButtonTitle}
+                    {!gettingDaiAllowance && !isDaiAllowanceTransactionPending && unlockDaiButtonTitle}
                   </Button.Outline>
                   <DaiIcon size={45} ml={3} />
                 </Flex>
               </Flex>
-              <StatusText isSuccess={!!daiUnlocked}>
+              <StatusText>
                 <StatusIcon>
-                  {!!daiUnlocked && <Icon name="CheckCircle" color="success" size={17} />}
-                  {!daiUnlocked && <Icon name="Cancel" color="danger" size={17} />}
+                  {!!daiUnlocked && !isDaiAllowanceTransactionPending && <Icon name="CheckCircle" color="success" size={17} />}
+                  {!daiUnlocked && !isDaiAllowanceTransactionPending && <Icon name="Cancel" color="danger" size={17} />}
+                  {!daiUnlocked && !!isDaiAllowanceTransactionPending && <Icon name="QueryBuilder" color="blue" size={17} />}
                 </StatusIcon>
-                {daiUnlocked ? 'Confirmed' : 'Unconfirmed'}
+                {!!daiUnlocked && !isDaiAllowanceTransactionPending && 'Confirmed'}
+                {!daiUnlocked && !isDaiAllowanceTransactionPending && 'Unconfirmed'}
+                {!daiUnlocked && !!isDaiAllowanceTransactionPending && (
+                  <Link color="#605e69" href={getTransactionDetailsLink(daiAllowanceTransaction.hash, networkId)} target="_blank">Pending</Link>
+                )}
               </StatusText>
             </InputWrapper>
           </>
@@ -359,6 +417,7 @@ const FractionateForm = ({
         minBid={Number(minBid)}
         minBidIncrease={Number(minBidIncrease)}
         auctionDurationSeconds={Number(auctionDurationSeconds)}
+        onSuccess={resetForm}
         buttonProps={{
           disabled: !!submitDisabled,
           mt: 40,
@@ -379,6 +438,8 @@ FractionateForm.propTypes = {
   connectedWalletAddress: PropTypes.string,
   networkId: PropTypes.number,
   approveTokenTransaction: PropTypes.func,
+  approveNftTransaction: PropTypes.func,
+  removeNftFromWalletAssets: PropTypes.func,
 };
 
 const mapStateToProps = ({
@@ -398,6 +459,8 @@ const mapStateToProps = ({
 
 const mapDispatchToProps = {
   approveTokenTransaction: approveTokenTransactionAction,
+  approveNftTransaction: approveNftTransactionAction,
+  removeNftFromWalletAssets: removeNftFromWalletAssetsAction,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(FractionateForm);

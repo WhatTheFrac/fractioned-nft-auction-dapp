@@ -8,6 +8,7 @@ import {
   STATUS_PENDING,
   TRANSACTION_TYPE,
   SET_WAITING_FOR_TRANSACTION_SUBMIT,
+  RESET_FRACTIONATE_TRANSACTION,
 } from '../constants/transactionConstants';
 
 // assets
@@ -21,6 +22,7 @@ import {
   formatTokenAmount,
   getDaiAddress,
   getERC20Contract,
+  getERC721Contract,
   getFrackerContractAddress,
   isCaseInsensitiveEqual,
 } from '../utils';
@@ -46,7 +48,7 @@ export const approveTokenTransactionAction = (amount, address) => async (dispatc
       const transaction = {
         hash,
         from: connectedWalletAddress,
-        type: TRANSACTION_TYPE.TOKEN_APPROVE,
+        type: TRANSACTION_TYPE.FRACTIONATE_TOKEN_APPROVE,
         status: STATUS_PENDING,
       };
       dispatch({ type: ADD_TRANSACTION, payload: transaction })
@@ -58,6 +60,33 @@ export const approveTokenTransactionAction = (amount, address) => async (dispatc
     })
     .catch(() => {});
 };
+
+export const approveNftTransactionAction = (nftTokenAddress, nftTokenId, address) => async (dispatch, getState) => {
+  const { wallet: { connected: connectedWallet } } = getState();
+  const { address: connectedWalletAddress } = connectedWallet;
+  const ERC721Contract = getERC721Contract(nftTokenAddress);
+  dispatch({ type: SET_WAITING_FOR_TRANSACTION_SUBMIT });
+  ERC721Contract.methods
+    .approve(address, nftTokenId)
+    .send({ from: connectedWalletAddress }, (err, hash) => {
+      if (err) return; // TODO: transaction failed notification
+      const transaction = {
+        hash,
+        from: connectedWalletAddress,
+        type: TRANSACTION_TYPE.FRACTIONATE_NFT_APPROVE,
+        status: STATUS_PENDING,
+      };
+      dispatch({ type: ADD_TRANSACTION, payload: transaction })
+    })
+    .then((result) => {
+      const resultTransactionHash = get(result, 'transactionHash');
+      if (!resultTransactionHash) return; // TODO: transaction failed notification
+      dispatch({ type: SET_TRANSACTION_CONFIRMED, payload: resultTransactionHash })
+    })
+    .catch(() => {});
+};
+
+export const resetFractionateTransactionAction = () => ({ type: RESET_FRACTIONATE_TRANSACTION })
 
 export const fractionateTransactionAction = (
   nftAddress,
