@@ -45,7 +45,6 @@ const AuctionDisplay = ({ nftAssets, auction, selectAction, openSeaAssets }) => 
   let balancerLink = null;
   if (auction.balancerPool !== EMPTY_ADDRESS && auction.token != null) {
     let balancerAddress = BALANCER_SWAP_ADDRESS + auction.token;
-    console.log(theme.colors)
     balancerLink =
       <Link
         href={balancerAddress}
