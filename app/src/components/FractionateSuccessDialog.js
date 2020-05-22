@@ -35,7 +35,7 @@ const FractionateSuccessDialog = (props) => {
           </Text>
           <Flex mt={4} justifyContent="center">
             <Card p={3} borderRadius={16}>
-              <Image src="logo512.png" size="156px" />
+              <Image src="logo256.png" size="156px" />
             </Card>
           </Flex>
         </Box>

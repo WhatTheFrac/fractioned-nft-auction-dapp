@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Avatar, Card, Flex, Heading } from "rimble-ui";
+import { Image, Card, Flex, Heading } from "rimble-ui";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
@@ -92,14 +92,17 @@ const AuctionDisplay = ({ nftAssets, auction, connectedWalletAddress, openSeaAss
     }, 1000);
   });
 
+  const NFT_DISPLAY_SIZE = 100;
+
   return (
     <>
       <NFTHero>
         <Centered>
           <Flex flexDirection="row" alignItems="center">
-            <div style={{ width: 100, height: 100 }}>
-              <Avatar
-                size="100px"
+            <div style={{ width: NFT_DISPLAY_SIZE, height: NFT_DISPLAY_SIZE, boxShadow: "0px 0px 10px #888888" }}>
+              <Image
+                height={NFT_DISPLAY_SIZE+"px"}
+                width={NFT_DISPLAY_SIZE+"px"}
                 src={getNFTImageURL()}
               />
             </div>

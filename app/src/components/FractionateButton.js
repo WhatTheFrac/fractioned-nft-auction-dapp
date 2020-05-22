@@ -260,7 +260,7 @@ const FractionateButton = ({
                   {putForSale && (
                     <FractionateModalInfoRow
                       title="Number of NFT shares to sell"
-                      description="This is the number of shares that will be put on sale."
+                      description="This is the number of shares that will be put on sale in the Balancer pool."
                       data={`${nftTokenSellAmount} shares`}
                       secondaryData={`${100 * nftTokenSellAmount / nftTokenSupplyAmount}% of ${nftTokenSupplyAmount}`}
                     />

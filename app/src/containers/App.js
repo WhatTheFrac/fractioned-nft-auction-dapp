@@ -5,9 +5,11 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Loader, Box, Flex, Flash } from 'rimble-ui';
 import isEmpty from 'lodash/isEmpty';
+import { Icon } from '@rimble/icons';
 
 // components
 import Wallet from '../components/Wallet';
+import Logo from '../components/Logo';
 import FractionateForm from '../components/FractionateForm';
 import AuctionListDisplay from '../components/AuctionListDisplay';
 import Tabs from '../components/Tabs';
@@ -91,17 +93,25 @@ const App = (props) => {
     <PageWrapper>
       {appLoading && <Loader size={70} />}
       {!appLoading && (
-        <Flex flexDirection="column" width={CONTENT_WIDTH}>
-          <TopRight>
-            <Wallet />
-          </TopRight>
-          <Flash my={3} variant="danger" mb={40}>
-            This is untested and is not guaranteed to work. Do not use with any real funds or items.
-          </Flash>
-          <Box>
-            <Tabs tabData={tabData} />
-          </Box>
-        </Flex>
+        <>
+          <Logo />
+          <Flex flexDirection="column" width={CONTENT_WIDTH}>
+            <TopRight>
+              <Wallet />
+            </TopRight>
+            <Flash my={3} variant="danger" mb={40}>
+              <Flex alignItems="center">
+                <Icon mr={20} name="Warning" size="40" />
+                <div mt={2}>
+                  This is untested and is not guaranteed to work. Do not use with any real funds or items.
+                </div>
+              </Flex>
+            </Flash>
+            <Box>
+              <Tabs tabData={tabData} />
+            </Box>
+          </Flex>
+        </>
       )}
     </PageWrapper>
   );
