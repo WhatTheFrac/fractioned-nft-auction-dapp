@@ -5,6 +5,8 @@ import {
   SET_TRANSACTION_CONFIRMED,
   STATUS_CONFIRMED,
   SET_WAITING_FOR_TRANSACTION_SUBMIT,
+  RESET_FRACTIONATE_TRANSACTION,
+  TRANSACTION_TYPE,
 } from '../constants/transactionConstants';
 
 // utils
@@ -33,6 +35,12 @@ const collectiblesReducer = (state = initialState, action) => {
         return data;
       }, [...state.data])
       return { ...state, data: updatedData };
+    case RESET_FRACTIONATE_TRANSACTION:
+      return {
+        ...state,
+        data: [...state.data.filter((transaction) => transaction.type !== TRANSACTION_TYPE.FRACTIONATE)],
+        waitingForSubmit: false,
+      };
     default:
       return state;
   }

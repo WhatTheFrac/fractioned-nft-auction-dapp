@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import moment from 'moment';
 
 // actions
-import { fractionateTransactionAction } from '../actions/transactionActions';
+import { fractionateTransactionAction, resetFractionateTransactionAction } from '../actions/transactionActions';
 
 // constants
 import {
@@ -44,22 +44,21 @@ const FractionateButton = ({
   minBid,
   minBidIncrease,
   auctionDurationSeconds,
+  onSuccess,
+  resetFractionateTransaction,
 }) => {
-  // TODO const { } = props;
+  const transaction = transactions.find(
+    ({ type, from }) => type === TRANSACTION_TYPE.FRACTIONATE
+      && isCaseInsensitiveEqual(from, connectedWalletAddress)
+  ) || {};
+  const transactionInProgress = transaction.status === STATUS_PENDING;
 
-  const resetState = () => {
-  }
-
-  const closeModal = e => {
+  const closeModal = (e) => {
     e.preventDefault();
-    resetState();
     setIsOpen(false);
-    // TODO cancel in progress transaction if there is one in progress
   };
 
-  const openModal = e => {
-    e.preventDefault();
-    resetState();
+  const openModal = () => {
     setIsOpen(true);
   };
 
@@ -79,17 +78,14 @@ const FractionateButton = ({
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showFailureDialog, setShowFailureDialog] = useState(false);
 
-
-  const transaction = transactions.find(
-    ({ type, from }) => type === TRANSACTION_TYPE.FRACTIONATE
-      && isCaseInsensitiveEqual(from, connectedWalletAddress)
-  ) || {};
-  const transactionInProgress = transaction.status === STATUS_PENDING;
-
   useEffect(() => {
-    if (transaction.status === STATUS_CONFIRMED) setShowSuccessDialog(true);
+    if (transaction.status === STATUS_CONFIRMED){
+      setShowSuccessDialog(true);
+      resetFractionateTransaction();
+      setIsOpen(false);
+      if (onSuccess) onSuccess(true);
+    }
   }, [transactions])
-
 
   const userFractionateConfirm = (e) => {
     e.preventDefault();
@@ -112,12 +108,11 @@ const FractionateButton = ({
   };
 
   // TODO call this when the transaction actually fails
-  const openFailureDialog = e => {
-    e.preventDefault();
-    resetState();
-    setShowFailureDialog(true);
-    closeModal(e);
-  };
+  // const openFailureDialog = e => {
+  //   e.preventDefault();
+  //   setShowFailureDialog(true);
+  //   closeModal(e);
+  // };
 
   const closeFailureDialog = () => {
     setShowFailureDialog(false);
@@ -162,10 +157,11 @@ const FractionateButton = ({
   const putForSale = nftTokenSellAmount !== 0;
   const durationDisplayValue = `${moment.duration(auctionDurationSeconds, 'seconds').days()} day(s)`;
   const durationDeadlineDisplayValue = `Auction will end on ${moment().add('seconds', auctionDurationSeconds).format('YYYY-MM-DD [at] HH:mm')}`;
+  const fractionateButtonTitle = transactionInProgress ? 'View pending transaction' : 'Fractionate';
 
   return (
     <>
-      <Button onClick={openModal} {...buttonProps || []}>Fractionate</Button>
+      <Button onClick={openModal} {...buttonProps || []}>{fractionateButtonTitle}</Button>
       {!isEmpty(selectedNft) && (
         <Modal isOpen={isOpen}>
           <Card borderRadius={1} p={0} width={600}>
@@ -179,7 +175,7 @@ const FractionateButton = ({
               <Flex>
                 <Eth color="primary" size="40" />
               </Flex>
-              <Flex onClick={openFailureDialog}>
+              <Flex>
                 <Heading textAlign="center" as="h1" fontSize={[2, 3]} px={[3, 0]}>
                   Fractionate Transaction
                 </Heading>
@@ -337,6 +333,8 @@ FractionateButton.propTypes = {
   minBid: PropTypes.number,
   minBidIncrease: PropTypes.number,
   auctionDurationSeconds: PropTypes.number,
+  onSuccess: PropTypes.func,
+  resetFractionateTransaction: PropTypes.func,
 };
 
 const mapStateToProps = ({
@@ -359,6 +357,7 @@ const mapStateToProps = ({
 
 const mapDispatchToProps = {
   fractionateTransaction: fractionateTransactionAction,
+  resetFractionateTransaction: resetFractionateTransactionAction,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(FractionateButton);
