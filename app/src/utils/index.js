@@ -169,14 +169,31 @@ export const getTimeRemainingDisplay = (timeRemaining, timeGranularity) => {
   let minutes = Math.floor((timeRemaining / 1000 / 60) % 60);
   let seconds = Math.floor((timeRemaining / 1000) % 60);
 
+  let mustShow = false;
   let timerDisplay = "";
-  timerDisplay = timerDisplay.concat(" " + days + " " + (days > 1 ? "days" : "day"));
+
+  if (days) {
+    timerDisplay = timerDisplay.concat(" " + days + " " + (days > 1 ? "days" : "day"));
+    mustShow = true;
+  }
   if (timeGranularity === TimeGranularity.DAYS) return timerDisplay;
-  timerDisplay = timerDisplay.concat(" " + hours + " " + (hours > 1 ? "hours" : "hour"));
+
+  if (hours || mustShow) {
+    timerDisplay = timerDisplay.concat(" " + hours + " " + (hours > 1 ? "hours" : "hour"));
+    mustShow = true;
+  }
   if (timeGranularity === TimeGranularity.HOURS) return timerDisplay;
-  timerDisplay = timerDisplay.concat(" " + minutes + " " + (minutes > 1 ? "minutes" : "minute"));
+
+  if (minutes || mustShow) {
+    timerDisplay = timerDisplay.concat(" " + minutes + " " + (minutes > 1 ? "minutes" : "minute"));
+    mustShow = true;
+  }
   if (timeGranularity === TimeGranularity.MINUTES) return timerDisplay;
-  timerDisplay = timerDisplay.concat(" " + seconds + " " + (seconds > 1 ? "seconds" : "second"));
+
+  if (seconds || mustShow) {
+    timerDisplay = timerDisplay.concat(" " + seconds + " " + (seconds > 1 ? "seconds" : "second"));
+    mustShow = true;
+  }
   if (timeGranularity === TimeGranularity.SECONDS) return timerDisplay;
 
   return timerDisplay;
