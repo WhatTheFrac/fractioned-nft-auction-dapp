@@ -198,3 +198,5 @@ export const getTimeRemainingDisplay = (timeRemaining, timeGranularity) => {
 
   return timerDisplay;
 }
+
+export const getKeyForNFT = (address, id) => "NFT:" + address + ":" + id;

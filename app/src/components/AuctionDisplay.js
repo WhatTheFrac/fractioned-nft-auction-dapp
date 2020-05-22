@@ -8,7 +8,7 @@ import AuctionBidDisplay from "./AuctionBidDisplay";
 import AuctionCompleteDisplay from "./AuctionCompleteDisplay";
 
 // utils
-import { AuctionState, EMPTY_ADDRESS } from "../utils";
+import { AuctionState, EMPTY_ADDRESS, getKeyForNFT } from "../utils";
 
 const NFTHero = styled(Card)`
   position: relative;
@@ -25,7 +25,7 @@ const Centered = styled.div`
   transform: translate(-50%, -50%);
 `;
 
-const AuctionDisplay = ({ nftAssets, auction, connectedWalletAddress }) => {
+const AuctionDisplay = ({ nftAssets, auction, connectedWalletAddress, openSeaAssets }) => {
   // TODO implement these data/action functions <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,
   const handleBidSubmit = (bid) => alert("Bid button clicked with bid: " + bid);
   const handleClaimNFT = () => alert("claim nft button clicked");
@@ -45,9 +45,10 @@ const AuctionDisplay = ({ nftAssets, auction, connectedWalletAddress }) => {
     Math.max(getAuctionEndTimestampMS() - +new Date(), 0);
   const isAuctionComplete = () => getTimeRemaining() === 0;
 
-  // TODO <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-  const getNFTName = () => "Planet 239479";
-  const getNFTImageURL = () => "https://lh3.googleusercontent.com/gy4fPlhB0TJMk228L8mroeCgQxweAE6TCxIVqQ59CychrK4yGZkA98pCEs0INh9xmcpOMf5YMhiR2Vsw2eqMs0_Gkg";
+  let openSeaKey = getKeyForNFT(auction.nftContract, auction.nftId);
+
+  const getNFTName = () => openSeaAssets[openSeaKey].name;
+  const getNFTImageURL = () => openSeaAssets[openSeaKey].image_url;
 
   const isExistingBids = () => getCurrentBid() > 0;
   const isUserHighestBidder = () => {
@@ -58,6 +59,7 @@ const AuctionDisplay = ({ nftAssets, auction, connectedWalletAddress }) => {
     isAuctionComplete() ? connectedWalletAddress === auction.lastBidder : false;
 
   // TODO replace with actual logic <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  // needs to detect if the user has the fractional token in their wallet
   const isUserReturnsWinner = () =>  {
     return isAuctionComplete()
       ? false
@@ -133,6 +135,7 @@ AuctionDisplay.propTypes = {
   nftAssets: PropTypes.array,
   auction: PropTypes.object,
   connectedWalletAddress: PropTypes.string,
+  openSeaAssets: PropTypes.object,
 };
 
 const mapStateToProps = ({ wallet: { nftAssets } }) => ({
