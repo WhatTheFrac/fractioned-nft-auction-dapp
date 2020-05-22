@@ -33,11 +33,23 @@ export const fetchWalletNftAssetsAction = () => async (dispatch, getState) => {
   dispatch({ type: SET_WALLET_NFT_ASSETS, payload: fetched });
 };
 
+
 export const fetchCollectibleByTokenData = (address, id) => async (dispatch, getState) => {
   const key = getKeyForNFT(address, id);
   dispatch({ type: SET_OPENSEA_NFT_ASSET_FETCHING, payload: key });
   const fetched = await getCollectibleByTokenData(address, id, 0);
   dispatch({ type: SET_OPENSEA_NFT_ASSET, payload: {key: key, data: fetched} });
+};
+
+export const removeNftFromWalletAssetsAction = (uid) => async (dispatch, getState) => {
+  const { wallet: { connected: connectedWallet, nftAssets } } = getState();
+
+  // check if wallet connected
+  if (isEmpty(connectedWallet)) return;
+
+  const updated = nftAssets.filter((nft) => nft.uid !== uid);
+  dispatch({ type: SET_WALLET_NFT_ASSETS_FETCHING, payload: true });
+  dispatch({ type: SET_WALLET_NFT_ASSETS, payload: updated });
 };
 
 export const connectWalletAction = () => async (dispatch) => {

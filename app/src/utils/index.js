@@ -5,6 +5,7 @@ import { utils as ethersUtils } from 'ethers';
 
 // assets
 import erc20Abi from '../assets/abi/erc20.json';
+import erc721Abi from '../assets/abi/erc721.json';
 
 
 export const truncateHexString = (targetString) => {
@@ -47,6 +48,8 @@ export const pauseForSeconds = (seconds) => new Promise(resolve => setTimeout(re
 
 export const getERC20Contract = (address) => new window.web3.eth.Contract(erc20Abi, address);
 
+export const getERC721Contract = (address) => new window.web3.eth.Contract(erc721Abi, address);
+
 export const parseTokenAmount = (value, decimals = 18) => Number(
   decimals > 0 ? ethersUtils.formatUnits(value.toString(), decimals) : value.toString(),
 );
@@ -67,6 +70,14 @@ export const getTokenAllowance = (
 ) => getERC20Contract(tokenAddress).methods.allowance(walletAddress, allowanceAddress).call()
     .then((allowanceInWei) => parseTokenAmount(allowanceInWei, tokenDecimals))
     .catch(() => 0);
+
+export const isNftTransferApproved = (
+  addressToCheck,
+  tokenAddress,
+  tokenId,
+) => getERC721Contract(tokenAddress).methods.getApproved(tokenId).call()
+    .then((approvedAddress) => isCaseInsensitiveEqual(approvedAddress, addressToCheck))
+    .catch(() => false);
 
 export const parseNumberInputValue = (rawValue, noDecimals) => {
   let value = rawValue
