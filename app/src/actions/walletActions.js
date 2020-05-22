@@ -9,10 +9,14 @@ import {
   SET_WALLET_NFT_ASSETS_FETCHING,
   SET_WALLET_NFT_ASSETS,
   SET_TOKEN_BALANCE,
+  SET_OPENSEA_NFT_ASSET_FETCHING,
+  SET_OPENSEA_NFT_ASSET,
 } from '../constants/walletConstants';
 
+import { getKeyForNFT } from "../utils";
+
 // services
-import { getNftAssetsByOwnerAddress } from '../services/opensea'
+import { getNftAssetsByOwnerAddress, getCollectibleByTokenData } from '../services/opensea'
 
 // actions
 import { checkPendingTransactionsAction } from './transactionActions';
@@ -27,6 +31,14 @@ export const fetchWalletNftAssetsAction = () => async (dispatch, getState) => {
   dispatch({ type: SET_WALLET_NFT_ASSETS_FETCHING, payload: true });
   const fetched = await getNftAssetsByOwnerAddress(connectedWallet.address);
   dispatch({ type: SET_WALLET_NFT_ASSETS, payload: fetched });
+};
+
+
+export const fetchCollectibleByTokenData = (address, id) => async (dispatch, getState) => {
+  const key = getKeyForNFT(address, id);
+  dispatch({ type: SET_OPENSEA_NFT_ASSET_FETCHING, payload: key });
+  const fetched = await getCollectibleByTokenData(address, id, 0);
+  dispatch({ type: SET_OPENSEA_NFT_ASSET, payload: {key: key, data: fetched} });
 };
 
 export const removeNftFromWalletAssetsAction = (uid) => async (dispatch, getState) => {

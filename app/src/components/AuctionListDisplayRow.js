@@ -7,7 +7,7 @@ import { connect } from "react-redux";
 import { theme } from "rimble-ui";
 
 // utils
-import { getTimeRemainingDisplay, TimeGranularity, EMPTY_ADDRESS } from "../utils";
+import { getTimeRemainingDisplay, TimeGranularity, EMPTY_ADDRESS, getKeyForNFT } from "../utils";
 
 const ListItem = styled(Card)`
   position: relative;
@@ -17,10 +17,19 @@ const ListItem = styled(Card)`
 
 const BALANCER_SWAP_ADDRESS = 'https://balancer.exchange/#/swap/';
 
-const AuctionDisplay = ({ nftAssets, auction, selectAction }) => {
-  const getNFTName = () => "Kitties 98524";
-  const getNFTImageURL = () =>
-    "https://lh3.googleusercontent.com/gy4fPlhB0TJMk228L8mroeCgQxweAE6TCxIVqQ59CychrK4yGZkA98pCEs0INh9xmcpOMf5YMhiR2Vsw2eqMs0_Gkg";
+const AuctionDisplay = ({ nftAssets, auction, selectAction, openSeaAssets }) => {
+  let openSeaKey = getKeyForNFT(auction.nftContract, auction.nftId);
+  console.log({openSeaKey: openSeaKey, auction: auction, openSeaAssets: openSeaAssets, exists: openSeaKey in openSeaAssets });
+
+  let nftName;
+  let nftImageURL;
+  try{
+    nftName = openSeaAssets[openSeaKey].name;
+    nftImageURL = openSeaAssets[openSeaKey].image_url;
+  } catch (e) {
+    nftName = "..."
+    nftImageURL = "";
+  }
 
   const getAuctionEndTimestampMS = () =>
     (parseInt(auction.frackTime) + parseInt(auction.auctionDuration)) * 1000;
@@ -51,11 +60,11 @@ const AuctionDisplay = ({ nftAssets, auction, selectAction }) => {
               <div style={{ width: NFT_DISPLAY_SIZE, height: NFT_DISPLAY_SIZE, boxShadow: "0px 0px 10px #888888" }}>
                 <Avatar
                   size={NFT_DISPLAY_SIZE+"px"}
-                  src={getNFTImageURL()}
+                  src={nftImageURL}
                 />
               </div>
               <Heading as={"h1"} pl={20}>
-                {getNFTName()}
+                {nftName}
               </Heading>
             </Flex>
               <Text color={theme.colors.grey}>{timerDisplay}</Text>
@@ -74,6 +83,7 @@ AuctionDisplay.propTypes = {
   nftAssets: PropTypes.array,
   auction: PropTypes.any,
   selectAction: PropTypes.func,
+  openSeaAssets: PropTypes.object,
 };
 
 const mapStateToProps = ({ wallet: { nftAssets } }) => ({
