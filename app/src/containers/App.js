@@ -103,7 +103,7 @@ const App = (props) => {
               <Flex alignItems="center">
                 <Icon mr={20} name="Warning" size="40" />
                 <div mt={2}>
-                  This is untested and is not guaranteed to work. Do not use with any real funds or items.
+                  This is not guaranteed to work. Do not use with any real funds or items.
                 </div>
               </Flex>
             </Flash>
