@@ -27,7 +27,7 @@ const mapFromOpenSea = ({
 };
 
 const getOpenseaApiPrefix = () => {
-  const networkId = Number(window.web3.givenProvider.networkVersion);
+  const networkId = Number(window?.web3?.givenProvider?.networkVersion || 1);
   return networkId === 1 ? '' : 'rinkeby-';
 }
 

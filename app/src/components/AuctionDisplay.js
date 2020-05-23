@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Image, Card, Flex, Heading } from "rimble-ui";
 import PropTypes from "prop-types";
-import { connect } from "react-redux";
 
+// components
 import AuctionBidDisplay from "./AuctionBidDisplay";
 import AuctionCompleteDisplay from "./AuctionCompleteDisplay";
 
 // utils
 import { AuctionState, EMPTY_ADDRESS, getKeyForNFT } from "../utils";
+
 
 const NFTHero = styled(Card)`
   position: relative;
@@ -25,12 +26,16 @@ const Centered = styled.div`
   transform: translate(-50%, -50%);
 `;
 
-const AuctionDisplay = ({ nftAssets, auction, connectedWalletAddress, openSeaAssets }) => {
-  // TODO implement these data/action functions <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,
-  const handleBidSubmit = (bid) => alert("Bid button clicked with bid: " + bid);
-  const handleClaimNFT = () => alert("claim nft button clicked");
-  const handleClaimWinnings = () => alert("claim winnings button clicked");
-
+const AuctionDisplay = ({
+  auction,
+  connectedWallet,
+  openSeaAssets,
+  transactions,
+  balances,
+  approveTokenTransaction,
+  bidAuctionTransaction,
+  getLoadAllFrac,
+}) => {
   const getCurrentBid = () => parseInt(auction.lastBid);
   const getMinimumBid = () => {
     if (auction.lastBidder === EMPTY_ADDRESS) {
@@ -52,11 +57,11 @@ const AuctionDisplay = ({ nftAssets, auction, connectedWalletAddress, openSeaAss
 
   const isExistingBids = () => getCurrentBid() > 0;
   const isUserHighestBidder = () => {
-    return isExistingBids() ? connectedWalletAddress === auction.lastBidder : false;
+    return isExistingBids() ? connectedWallet.address === auction.lastBidder : false;
 
   }
   const isUserNFTWinner = () =>
-    isAuctionComplete() ? connectedWalletAddress === auction.lastBidder : false;
+    isAuctionComplete() ? connectedWallet.address === auction.lastBidder : false;
 
   // TODO replace with actual logic <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
   // needs to detect if the user has the fractional token in their wallet
@@ -117,17 +122,21 @@ const AuctionDisplay = ({ nftAssets, auction, connectedWalletAddress, openSeaAss
           auctionState={auctionState}
           endTime={getAuctionEndTimestampMS()}
           timeRemaining={timeRemaining}
-          handleBidSubmit={handleBidSubmit}
+          bidAuctionTransaction={bidAuctionTransaction}
           currentBid={getCurrentBid()}
           minBid={getMinimumBid()}
+          transactions={transactions}
+          connectedWallet={connectedWallet}
+          balances={balances}
+          approveTokenTransaction={approveTokenTransaction}
+          auctionId={auction.id}
+          getLoadAllFrac={getLoadAllFrac}
         />
       )}
       {auctionIsComplete && (
         <AuctionCompleteDisplay
           auctionState={auctionState}
           currentBid={getCurrentBid()}
-          handleClaimNFT={handleClaimNFT}
-          handleClaimWinnings={handleClaimWinnings}
         />
       )}
     </>
@@ -135,14 +144,14 @@ const AuctionDisplay = ({ nftAssets, auction, connectedWalletAddress, openSeaAss
 };
 
 AuctionDisplay.propTypes = {
-  nftAssets: PropTypes.array,
   auction: PropTypes.object,
-  connectedWalletAddress: PropTypes.string,
+  connectedWallet: PropTypes.string,
   openSeaAssets: PropTypes.object,
+  transactions: PropTypes.array,
+  balances: PropTypes.array,
+  approveTokenTransaction: PropTypes.func,
+  bidAuctionTransaction: PropTypes.func,
+  getLoadAllFrac: PropTypes.func,
 };
 
-const mapStateToProps = ({ wallet: { nftAssets } }) => ({
-  nftAssets,
-});
-
-export default connect(mapStateToProps)(AuctionDisplay);
+export default AuctionDisplay;

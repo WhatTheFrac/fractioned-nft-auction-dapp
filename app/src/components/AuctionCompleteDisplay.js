@@ -1,24 +1,15 @@
 import React from "react";
-import styled from "styled-components";
 import { Button, Card, Flex, Heading, Text } from "rimble-ui";
 import PropTypes from "prop-types";
-import { connect } from "react-redux";
 
 // utils
-import { AuctionState } from "../utils";
+import { AuctionState, parseTokenAmount } from '../utils';
 import { theme } from "rimble-ui";
 
-const hr = styled.span`
-  display: block;
-  width: 100%;
-  border-top: 1px solid red;
-`;
 
 const AuctionCompleteDisplay = ({
   auctionState,
   currentBid,
-  handleClaimNFT,
-  handleClaimWinnings,
 }) => {
   return (
     <Card mt={20} backgroundColor={theme.colors.primary}>
@@ -34,13 +25,13 @@ const AuctionCompleteDisplay = ({
           Sold for
         </Heading>
         <Heading as={"h1"} px={8}>
-          {currentBid}
+          {parseTokenAmount(currentBid)}
         </Heading>
-        <Text>Dai</Text>
+        <Text>DAI</Text>
       </Flex>
       {auctionState === AuctionState.WON_NFT && (
         <Flex mt={20}>
-          <Button onClick={handleClaimNFT} style={{ flex: 0.5 }} mr={16}>
+          <Button onClick={() => {}} style={{ flex: 0.5 }} mr={16}>
             Claim the NFT
           </Button>
           <Text fontSize={1} style={{ flex: 0.5 }} color={theme.colors.grey}>
@@ -51,12 +42,12 @@ const AuctionCompleteDisplay = ({
       )}
       {auctionState === AuctionState.WON_PAYOUT && (
         <Flex mt={20}>
-          <Button onClick={handleClaimNFT} style={{ flex: 0.5 }} mr={16}>
-            Claim your Dai
+          <Button onClick={() => {}} style={{ flex: 0.5 }} mr={16}>
+            Claim your DAI
           </Button>
           <Text fontSize={1} style={{ flex: 0.5 }} color={theme.colors.grey}>
             Claim your share of the winning bid! You will receive your portion
-            of the Dai immediately after claiming it.
+            of the DAI immediately after claiming it.
           </Text>
         </Flex>
       )}
@@ -67,12 +58,6 @@ const AuctionCompleteDisplay = ({
 AuctionCompleteDisplay.propTypes = {
   auctionState: PropTypes.string.isRequired,
   currentBid: PropTypes.number.isRequired,
-  handleClaimNFT: PropTypes.func.isRequired,
-  handleClaimWinnings: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = ({ wallet: { nftAssets } }) => ({
-  nftAssets,
-});
-
-export default connect(mapStateToProps)(AuctionCompleteDisplay);
+export default AuctionCompleteDisplay;

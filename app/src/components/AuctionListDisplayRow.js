@@ -7,7 +7,13 @@ import { connect } from "react-redux";
 import { theme } from "rimble-ui";
 
 // utils
-import { getTimeRemainingDisplay, TimeGranularity, EMPTY_ADDRESS, getKeyForNFT } from "../utils";
+import {
+  getTimeRemainingDisplay,
+  TimeGranularity,
+  EMPTY_ADDRESS,
+  getKeyForNFT,
+  parseTokenAmount,
+} from '../utils';
 
 const ListItem = styled(Card)`
   position: relative;
@@ -17,7 +23,7 @@ const ListItem = styled(Card)`
 
 const BALANCER_SWAP_ADDRESS = 'https://balancer.exchange/#/swap/';
 
-const AuctionDisplay = ({ nftAssets, auction, selectAction, openSeaAssets }) => {
+const AuctionDisplay = ({ auction, selectAction, openSeaAssets }) => {
   let openSeaKey = getKeyForNFT(auction.nftContract, auction.nftId);
 
   let nftName;
@@ -37,8 +43,6 @@ const AuctionDisplay = ({ nftAssets, auction, selectAction, openSeaAssets }) => 
   let timerDisplay = timeRemaining === 0
     ? "Fractionate is complete."
     : "Ends in " + getTimeRemainingDisplay(timeRemaining, TimeGranularity.MINUTES);
-
-  const lastBidAmount = () => parseInt(auction.lastBid);
 
   const NFT_DISPLAY_SIZE = 80;
 
@@ -79,7 +83,7 @@ const AuctionDisplay = ({ nftAssets, auction, selectAction, openSeaAssets }) => 
           </Flex>
           <Flex flexDirection="column" alignItems="center">
             <Button mb={20} onClick={selectAction}>Go To Auction</Button>
-            <Text color={theme.colors.grey}>Current bid: {lastBidAmount()}</Text>
+            <Text color={theme.colors.grey}>Current bid: {parseTokenAmount(auction.lastBid)} DAI</Text>
           </Flex>
         </Flex>
       </ListItem>
@@ -87,14 +91,9 @@ const AuctionDisplay = ({ nftAssets, auction, selectAction, openSeaAssets }) => 
 };
 
 AuctionDisplay.propTypes = {
-  nftAssets: PropTypes.array,
   auction: PropTypes.any,
   selectAction: PropTypes.func,
   openSeaAssets: PropTypes.object,
 };
 
-const mapStateToProps = ({ wallet: { nftAssets } }) => ({
-  nftAssets,
-});
-
-export default connect(mapStateToProps)(AuctionDisplay);
+export default AuctionDisplay;

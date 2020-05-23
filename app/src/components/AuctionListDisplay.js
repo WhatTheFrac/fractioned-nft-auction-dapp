@@ -3,14 +3,28 @@ import { Button } from "rimble-ui";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
+// components
 import AuctionDisplay from "./AuctionDisplay";
 import AuctionListDisplayRow from "./AuctionListDisplayRow";
 
+// actions
 import { fetchCollectibleByTokenData } from '../actions/walletActions';
+import { approveTokenTransactionAction, bidAuctionTransactionAction, getLoadAllFracAction } from '../actions/transactionActions';
+
 
 const NO_AUCTION = -1;
 
-const AuctionListDisplay = ({ nftAssets, allFracExisting, connectedWalletAddress, loadOpensea, openSeaAssets }) => {
+const AuctionListDisplay = ({
+  allFracExisting,
+  connectedWallet,
+  loadOpensea,
+  openSeaAssets,
+  transactions,
+  balances,
+  approveTokenTransaction,
+  bidAuctionTransaction,
+  getLoadAllFrac,
+}) => {
   const [selectedAuctionID, setSelectedAuctionID] = useState(NO_AUCTION);
 
   const onClickAuction = (id) => setSelectedAuctionID(id);
@@ -33,8 +47,13 @@ const AuctionListDisplay = ({ nftAssets, allFracExisting, connectedWalletAddress
         </Button.Outline>
         <AuctionDisplay
           auction={allFracExisting[selectedAuctionID]}
-          connectedWalletAddress={connectedWalletAddress}
+          connectedWallet={connectedWallet}
           openSeaAssets={openSeaAssets}
+          transactions={transactions}
+          balances={balances}
+          approveTokenTransaction={approveTokenTransaction}
+          bidAuctionTransaction={bidAuctionTransaction}
+          getLoadAllFrac={getLoadAllFrac}
         />
       </>
     )
@@ -45,7 +64,6 @@ const AuctionListDisplay = ({ nftAssets, allFracExisting, connectedWalletAddress
       key={key}
       selectAction={() => onClickAuction(key)}
       auction={auction}
-      nftAssets={nftAssets}
       openSeaAssets={openSeaAssets}
     />
   );
@@ -54,15 +72,13 @@ const AuctionListDisplay = ({ nftAssets, allFracExisting, connectedWalletAddress
 };
 
 AuctionListDisplay.propTypes = {
-  nftAssets: PropTypes.array,
   allFracExisting: PropTypes.any.isRequired,
   transactions: PropTypes.array,
   balances: PropTypes.arrayOf(PropTypes.shape({
     symbol: PropTypes.string,
     balance: PropTypes.number,
   })),
-  connectedWalletAddress: PropTypes.string,
-  networkId: PropTypes.number,
+  connectedWallet: PropTypes.object,
   approveTokenTransaction: PropTypes.func,
   loadOpensea: PropTypes.func.isRequired,
   openSeaAssets: PropTypes.object,
@@ -70,23 +86,23 @@ AuctionListDisplay.propTypes = {
 
 const mapStateToProps = ({
   wallet: {
-    nftAssets,
     balances,
     openSeaAssets,
-    connected: { address: connectedWalletAddress, networkId },
+    connected: connectedWallet,
   },
   transactions: { data: transactions },
 }) => ({
-  nftAssets,
   balances,
   transactions,
-  connectedWalletAddress,
-  networkId,
+  connectedWallet,
   openSeaAssets,
 });
 
 const mapDispatchToProps = {
   loadOpensea: fetchCollectibleByTokenData,
+  approveTokenTransaction: approveTokenTransactionAction,
+  bidAuctionTransaction: bidAuctionTransactionAction,
+  getLoadAllFrac: getLoadAllFracAction,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(AuctionListDisplay);
