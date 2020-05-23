@@ -9,6 +9,7 @@ import {
   TRANSACTION_TYPE,
   SET_WAITING_FOR_TRANSACTION_SUBMIT,
   RESET_FRACTIONATE_TRANSACTION,
+  SET_FRACS_FETCHING,
 } from '../constants/transactionConstants';
 
 // assets
@@ -28,6 +29,7 @@ import {
 } from '../utils';
 
 export const getLoadAllFracAction = () => async (dispatch, getState) => {
+  dispatch({ type: SET_FRACS_FETCHING });
   const allFrac = await loadAllFrac();
   dispatch({
     type: ADD_ALL_FRAC,
@@ -166,4 +168,56 @@ export const checkPendingTransactionsAction = () => async (dispatch, getState) =
 
   // some transactions are still pending, check once mor after 1s
   setTimeout(() => dispatch(checkPendingTransactionsAction()), 1000);
+};
+
+export const bidAuctionTransactionAction = (auctionId, bidAmount) => async (dispatch, getState) => {
+  const { wallet: { connected: connectedWallet, networkId } } = getState();
+  const { address: connectedWalletAddress } = connectedWallet;
+  dispatch({ type: SET_WAITING_FOR_TRANSACTION_SUBMIT });
+  const frackerContractAddress = getFrackerContractAddress(networkId);
+  const FrackerContract = new window.web3.eth.Contract(frackerAbi, frackerContractAddress);
+  FrackerContract.methods
+    .bid(auctionId, formatTokenAmount(bidAmount, 18))
+    .send({ from: connectedWalletAddress }, (err, hash) => {
+      if (err) return; // TODO: transaction failed notification
+      const transaction = {
+        hash,
+        from: connectedWalletAddress,
+        type: TRANSACTION_TYPE.FRACTIONATE_AUCTION_BID,
+        status: STATUS_PENDING,
+      };
+      dispatch({ type: ADD_TRANSACTION, payload: transaction })
+    })
+    .then((result) => {
+      const resultTransactionHash = get(result, 'transactionHash');
+      if (!resultTransactionHash) return; // TODO: transaction failed notification
+      dispatch({ type: SET_TRANSACTION_CONFIRMED, payload: resultTransactionHash })
+    })
+    .catch(() => {});
+};
+
+export const settleAuctionTransactionAction = (auctionId) => async (dispatch, getState) => {
+  const { wallet: { connected: connectedWallet, networkId } } = getState();
+  const { address: connectedWalletAddress } = connectedWallet;
+  dispatch({ type: SET_WAITING_FOR_TRANSACTION_SUBMIT });
+  const frackerContractAddress = getFrackerContractAddress(networkId);
+  const FrackerContract = new window.web3.eth.Contract(frackerAbi, frackerContractAddress);
+  FrackerContract.methods
+    .settle(auctionId)
+    .send({ from: connectedWalletAddress }, (err, hash) => {
+      if (err) return; // TODO: transaction failed notification
+      const transaction = {
+        hash,
+        from: connectedWalletAddress,
+        type: TRANSACTION_TYPE.FRACTIONATE_SETTLE_AUCTION,
+        status: STATUS_PENDING,
+      };
+      dispatch({ type: ADD_TRANSACTION, payload: transaction })
+    })
+    .then((result) => {
+      const resultTransactionHash = get(result, 'transactionHash');
+      if (!resultTransactionHash) return; // TODO: transaction failed notification
+      dispatch({ type: SET_TRANSACTION_CONFIRMED, payload: resultTransactionHash })
+    })
+    .catch(() => {});
 };

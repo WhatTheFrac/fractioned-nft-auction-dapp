@@ -7,6 +7,7 @@ import {
   SET_WAITING_FOR_TRANSACTION_SUBMIT,
   RESET_FRACTIONATE_TRANSACTION,
   TRANSACTION_TYPE,
+  SET_FRACS_FETCHING,
 } from '../constants/transactionConstants';
 
 // utils
@@ -16,13 +17,16 @@ import { isCaseInsensitiveEqual } from '../utils';
 const initialState = {
   data: [],
   waitingForSubmit: false,
+  fracsFetching: false,
   allFrac: [],
 };
 
 const collectiblesReducer = (state = initialState, action) => {
   switch (action.type) {
     case ADD_ALL_FRAC:
-      return { ...state, allFrac: action.payload };
+      return { ...state, allFrac: action.payload, fracsFetching: false };
+    case SET_FRACS_FETCHING:
+      return { ...state, fracsFetching: true };
     case SET_WAITING_FOR_TRANSACTION_SUBMIT:
       return { ...state, waitingForSubmit: true };
     case ADD_TRANSACTION:

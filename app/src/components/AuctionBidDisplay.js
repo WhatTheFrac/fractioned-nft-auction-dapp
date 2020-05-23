@@ -1,38 +1,84 @@
-import React, { useState } from "react";
-import styled from "styled-components";
+import React, { useEffect, useState } from 'react';
 import {
-  Avatar,
   Button,
   Card,
   Field,
   Flex,
   Heading,
   Input,
+  Loader,
   Text,
-} from "rimble-ui";
+} from 'rimble-ui';
 import PropTypes from "prop-types";
-
-// utils
-import { parseNumberInputValue, AuctionState, getTimeRemainingDisplay, TimeGranularity } from "../utils";
+import { Dai as DaiIcon } from '@rimble/icons';
 import { theme } from "rimble-ui";
 
-const hr = styled.span`
-  display: block;
-  width: 100%;
-  border-top: 1px solid red;
-`;
+// utils
+import {
+  parseNumberInputValue,
+  AuctionState,
+  getTimeRemainingDisplay,
+  TimeGranularity,
+  parseTokenAmount,
+  getTokenAllowance,
+  getFrackerContractAddress,
+  getDaiAddress,
+} from '../utils';
+
+// constants
+import {
+  STATUS_PENDING,
+  TRANSACTION_TYPE,
+} from '../constants/transactionConstants';
+
 
 const AuctionBidDisplay = ({
   auctionState,
   endTime,
   timeRemaining,
-  handleBidSubmit,
   currentBid,
   minBid,
+  connectedWallet,
+  transactions,
+  balances,
+  approveTokenTransaction,
+  bidAuctionTransaction,
+  auctionId,
+  getLoadAllFrac,
 }) => {
   const [bid, setBid] = useState("");
+  const [unlockedDaiAmount, setUnlockedDaiAmount] = useState(0);
+  const [gettingDaiAllowance, setGettingDaiAllowance] = useState(false);
+  const { address: connectedWalletAddress, networkId } = connectedWallet;
 
-  const minimumBidDisplay = "Minimum bid: " + minBid + " Dai";
+  useEffect(() => {
+    getLoadAllFrac()
+    if (gettingDaiAllowance) return;
+    setGettingDaiAllowance(true);
+    getTokenAllowance(
+      connectedWalletAddress,
+      getFrackerContractAddress(networkId),
+      getDaiAddress(networkId),
+      18,
+    )
+      .then(setUnlockedDaiAmount)
+      .then(() => setGettingDaiAllowance(false));
+  }, [transactions]);
+
+  const minBidAmountDai = parseTokenAmount(minBid);
+  const minimumBidDisplay = `> ${minBidAmountDai} DAI`;
+  const bidAmountDai = Number(bid);
+  const bidUnlocked = !!bidAmountDai && unlockedDaiAmount >= bidAmountDai;
+
+  const daiAllowanceTransaction = transactions.find((transaction) => transaction.type === TRANSACTION_TYPE.FRACTIONATE_TOKEN_APPROVE) || {};
+  const isDaiAllowanceTransactionPending = daiAllowanceTransaction.status === STATUS_PENDING;
+  const { balance: daiBalance = 0 } = balances.find((balance) => balance.symbol === 'DAI') || {};
+  const enoughDai = !!bidAmountDai && daiBalance >= bidAmountDai;
+  const unlockDaiButtonDisabled = !enoughDai || bidUnlocked || gettingDaiAllowance || isDaiAllowanceTransactionPending;
+  const unlockDaiButtonTitle = enoughDai || !bidAmountDai ? 'Unlock DAI' : 'Not enough DAI';
+
+  const auctionBidTransaction = transactions.find((transaction) => transaction.type === TRANSACTION_TYPE.FRACTIONATE_AUCTION_BID) || {};
+  const isAuctionBidTransactionPending = auctionBidTransaction.status === STATUS_PENDING;
 
   let timerDisplay = getTimeRemainingDisplay(timeRemaining, TimeGranularity.SECONDS);
 
@@ -71,9 +117,9 @@ const AuctionBidDisplay = ({
           <>
             <Flex flexDirection="row" mb={12} alignItems="center">
               <Heading as={"h1"} pr={8}>
-                {currentBid}
+                {parseTokenAmount(currentBid)}
               </Heading>
-              <Text>Dai</Text>
+              <Text>DAI</Text>
             </Flex>
           </>
         )}
@@ -92,21 +138,34 @@ const AuctionBidDisplay = ({
               }
               value={bid}
               width="100%"
+              disabled={isAuctionBidTransactionPending}
               placeholder={minimumBidDisplay}
             />
           </Field>
+          <Flex style={{ marginBottom: 16, flex: 1 }}>
+            <Button.Outline
+              style={{ flex: 1 }}
+              disabled={unlockDaiButtonDisabled}
+              onClick={() => approveTokenTransaction(bidAmountDai, getFrackerContractAddress(networkId))}
+            >
+              {(!!gettingDaiAllowance || isDaiAllowanceTransactionPending) && <Loader size={20} />}
+              {!gettingDaiAllowance && !isDaiAllowanceTransactionPending && unlockDaiButtonTitle}
+            </Button.Outline>
+            <DaiIcon size={45} ml={3} />
+          </Flex>
           <Flex
             style={{ flex: 0.6 }}
             height={80}
             alignItems="center"
             justifyContent="center"
           >
-            <Avatar
-              size={50}
-              src="https://airswap-token-images.s3.amazonaws.com/DAI.png"
-            />
-            <Button style={{ flex: 1 }} ml={16} onClick={() => handleBidSubmit(bid)}>
-              Place bid
+            <Button
+              style={{ flex: 1 }}
+              ml={16}
+              onClick={() => bidAuctionTransaction(auctionId, Number(bid))}
+              disabled={!bidUnlocked || bidAmountDai <= minBidAmountDai || isAuctionBidTransactionPending}
+            >
+              {isAuctionBidTransactionPending ? 'Bid pending' : 'Place bid'}
             </Button>
           </Flex>
         </Flex>
@@ -119,9 +178,15 @@ AuctionBidDisplay.propTypes = {
   auctionState: PropTypes.string.isRequired,
   endTime: PropTypes.number.isRequired,
   timeRemaining: PropTypes.number.isRequired,
-  handleBidSubmit: PropTypes.func.isRequired,
   currentBid: PropTypes.number.isRequired,
   minBid: PropTypes.number.isRequired,
+  connectedWallet: PropTypes.object,
+  transactions: PropTypes.array,
+  balances: PropTypes.array,
+  approveTokenTransaction: PropTypes.func,
+  bidAuctionTransaction: PropTypes.func,
+  auctionId: PropTypes.string,
+  getLoadAllFrac: PropTypes.func,
 };
 
 export default AuctionBidDisplay;
