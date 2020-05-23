@@ -145,7 +145,7 @@ const AuctionDisplay = ({
 
 AuctionDisplay.propTypes = {
   auction: PropTypes.object,
-  connectedWallet: PropTypes.string,
+  connectedWallet: PropTypes.object,
   openSeaAssets: PropTypes.object,
   transactions: PropTypes.array,
   balances: PropTypes.array,
