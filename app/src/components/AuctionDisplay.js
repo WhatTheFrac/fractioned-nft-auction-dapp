@@ -35,6 +35,7 @@ const AuctionDisplay = ({
   approveTokenTransaction,
   bidAuctionTransaction,
   getLoadAllFrac,
+  settleAuctionTransaction,
 }) => {
   const getCurrentBid = () => parseInt(auction.lastBid);
   const getMinimumBid = () => {
@@ -137,6 +138,9 @@ const AuctionDisplay = ({
         <AuctionCompleteDisplay
           auctionState={auctionState}
           currentBid={getCurrentBid()}
+          auctionId={auction.id}
+          transactions={transactions}
+          settleAuctionTransaction={settleAuctionTransaction}
         />
       )}
     </>
@@ -152,6 +156,7 @@ AuctionDisplay.propTypes = {
   approveTokenTransaction: PropTypes.func,
   bidAuctionTransaction: PropTypes.func,
   getLoadAllFrac: PropTypes.func,
+  settleAuctionTransaction: PropTypes.func,
 };
 
 export default AuctionDisplay;

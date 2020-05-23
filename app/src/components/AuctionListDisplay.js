@@ -9,7 +9,12 @@ import AuctionListDisplayRow from "./AuctionListDisplayRow";
 
 // actions
 import { fetchCollectibleByTokenData } from '../actions/walletActions';
-import { approveTokenTransactionAction, bidAuctionTransactionAction, getLoadAllFracAction } from '../actions/transactionActions';
+import {
+  approveTokenTransactionAction,
+  bidAuctionTransactionAction,
+  getLoadAllFracAction,
+  settleAuctionTransactionAction,
+} from '../actions/transactionActions';
 
 
 const NO_AUCTION = -1;
@@ -24,6 +29,7 @@ const AuctionListDisplay = ({
   approveTokenTransaction,
   bidAuctionTransaction,
   getLoadAllFrac,
+  settleAuctionTransaction,
 }) => {
   const [selectedAuctionID, setSelectedAuctionID] = useState(NO_AUCTION);
 
@@ -54,6 +60,7 @@ const AuctionListDisplay = ({
           approveTokenTransaction={approveTokenTransaction}
           bidAuctionTransaction={bidAuctionTransaction}
           getLoadAllFrac={getLoadAllFrac}
+          settleAuctionTransaction={settleAuctionTransaction}
         />
       </>
     )
@@ -103,6 +110,7 @@ const mapDispatchToProps = {
   approveTokenTransaction: approveTokenTransactionAction,
   bidAuctionTransaction: bidAuctionTransactionAction,
   getLoadAllFrac: getLoadAllFracAction,
+  settleAuctionTransaction: settleAuctionTransactionAction,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(AuctionListDisplay);
